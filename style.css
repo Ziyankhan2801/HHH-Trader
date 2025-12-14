@@ -1,0 +1,427 @@
+:root{
+  --bg-1: #f5f7f8;      /* light textured background */
+  --bg-2: #ffffff;
+  --card: #ffffff;
+  --accent: #c79b7a;    /* warm brand color */
+  --muted: #6b6b6b;
+  --text: #111;
+  --shadow: 0 10px 30px rgba(0,0,0,0.08);
+  --radius: 12px;
+  --max: 1100px;
+  --break-sm: 420px;
+  --break-md: 768px;
+  --break-lg: 980px;
+}
+*{box-sizing:border-box}
+html { scroll-behavior: smooth; } /* smooth scrolling */
+html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);background:linear-gradient(180deg,var(--bg-1),#eef2f3);-webkit-font-smoothing:antialiased}
+.wrap{max-width:var(--max);margin:0 auto;padding:18px}
+
+/* -------------------------
+   FIXED LOGO: Top-left
+   ------------------------- */
+/* make the logo link fixed so it sits at top-left like second video */
+.logo-link {
+  top: 12px;
+  left: 18px;
+  z-index: 140; /* above header */
+  display: block;
+  pointer-events: auto;
+}
+
+/* keep existing .logo img rules but ensure smaller height for a neat pinned look */
+.logo img{
+  height:64px;
+  max-height:64px;
+  width:auto;
+  border-radius:10px;
+  box-shadow:var(--shadow);
+  border:3px solid rgba(0,0,0,0.03);
+  display:block;
+}
+
+
+/* Reserve space in the header so nav/actions don't sit under the fixed logo.
+   Adjusted padding-left on the inner container of the topbar.
+   This value should be >= logo width + left offset + some gap. */
+.topbar-inner {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  justify-content:space-between;
+  padding-left:96px; /* reserve space for fixed logo */
+}
+
+/* -------------------------
+   topbar (sticky header)
+   ------------------------- */
+.topbar{
+  position:sticky;
+  top:0;
+  backdrop-filter:blur(6px);
+  background:rgba(255,255,255,0.92);
+  border-bottom:1px solid rgba(0,0,0,0.04);
+  z-index:120;
+}
+
+/* fallback rule in case some markup uses .logo (not .logo img) */
+.logo{display:flex;align-items:center;gap:12px;flex-shrink:0}
+
+/* if hero incorrectly contains the same logo image, this ensures hero area doesn't blow up */
+.hero-image img{
+  max-width:100%;
+  width:100%;
+  max-height:420px;
+  height:auto;
+  object-fit:contain;
+  border-radius:14px;
+  box-shadow:var(--shadow);
+}
+
+/* hamburger + nav */
+.hamburger{display:none;background:none;border:0;font-size:20px;padding:8px;cursor:pointer}
+.mainnav{display:flex;gap:12px;align-items:center}
+.mainnav a{padding:8px 10px;text-decoration:none;color:var(--text);border-radius:8px;transition:all 180ms}
+.mainnav a:hover, .mainnav a:focus{background:rgba(0,0,0,0.02);transform:translateY(-3px);outline:none}
+.actions{display:flex;gap:10px;align-items:center}
+.btn{background:var(--accent);color:#111;padding:10px 14px;border-radius:10px;border:0;cursor:pointer;box-shadow:var(--shadow);text-decoration:none;display:inline-block}
+.btn.ghost, .btn.ghost:active{background:transparent;border:1px solid rgba(0,0,0,0.06);box-shadow:none}
+.btn.small{padding:6px 10px;font-size:14px}
+.btn.tiny{padding:6px 8px;font-size:13px}
+
+/* Floating WhatsApp */
+.float-wa{position:fixed;left:18px;bottom:18px;background:linear-gradient(180deg,var(--accent),#b7835f);color:#111;padding:10px 14px;border-radius:16px;font-weight:700;text-decoration:none;box-shadow:0 18px 40px rgba(0,0,0,0.12);z-index:110}
+
+/* hero */
+.hero{padding:36px 0}
+.hero-inner{display:flex;gap:20px;align-items:center}
+.hero-text{flex:1}
+.hero-text h1{font-size:34px;margin:0}
+.accent{color:var(--accent)}
+.lead{color:var(--muted);margin-top:8px}
+.hero-ctas{margin-top:12px;display:flex;gap:10px}
+.trust{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+.badge{background:rgba(0,0,0,0.03);padding:6px 10px;border-radius:8px;font-size:13px}
+.hero-image{width:380px;flex-shrink:0}
+
+/* reveal base used elsewhere */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px) scale(0.995);
+  transition: opacity 520ms cubic-bezier(.2,.9,.2,1), transform 520ms cubic-bezier(.2,.9,.2,1);
+  will-change: opacity, transform;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* products */
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.controls{display:flex;gap:8px;align-items:center}
+.controls select, .controls input{padding:8px 10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);background:transparent}
+.masonry{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-top:18px}
+.card{background:var(--card);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;transition:transform .22s, box-shadow .22s}
+.card:hover{transform:translateY(-6px)}
+.card-media img{width:100%;height:260px;object-fit:cover;display:block}
+.card-body{padding:12px;display:flex;flex-direction:column;gap:8px}
+.card-body h3{margin:0;font-size:16px}
+.muted{color:var(--muted)}
+.meta{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.actions-inline{display:flex;gap:8px;align-items:center}
+.price{font-weight:700;color:var(--accent)}
+.wa-product{margin-top:8px;background:#25D366;color:#fff;border:0;padding:10px;border-radius:8px;cursor:pointer;transition: transform 220ms, box-shadow 220ms}
+.wa-product:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(0,0,0,0.08);}
+
+/* contact form */
+.contact-grid{display:grid;grid-template-columns:1fr 420px;gap:20px;align-items:start;margin-top:18px}
+.contact-form-card{background:var(--card);padding:16px;border-radius:12px;box-shadow:var(--shadow)}
+.contact-form-card h3{margin-top:0}
+.contact-form-card input, .contact-form-card textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);margin-bottom:8px}
+.form-actions{display:flex;gap:10px;align-items:center}
+.small{font-size:13px}
+.site-footer{padding:22px 0;background:transparent;border-top:1px solid rgba(0,0,0,0.04);margin-top:26px}
+
+/* testimonials */
+.testimonial-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+blockquote{background:var(--card);padding:12px;border-radius:10px;box-shadow:var(--shadow);margin:0}
+
+/* accessibility focus */
+a:focus, button:focus, input:focus, select:focus, textarea:focus {
+  outline: 3px solid rgba(199,155,122,0.18);
+  outline-offset: 3px;
+}
+
+/* small helper for full width inputs on narrow screens */
+.full-width-mobile { width: 100%; }
+
+/* -------------------------
+   Responsive rules
+   ------------------------- */
+@media (max-width:980px){
+  .hero-inner{flex-direction:column-reverse;align-items:flex-start}
+  .hero-image{width:100%}
+  .contact-grid{grid-template-columns:1fr;gap:12px}
+  .hamburger{display:block}
+
+  /* mobile menu */
+  .mainnav{
+    position:fixed;
+    right:18px;
+    top:70px;
+    background:var(--card);
+    padding:12px;
+    border-radius:10px;
+    display:none;
+    flex-direction:column;
+    box-shadow:var(--shadow);
+    gap:10px;
+    z-index:200;
+    min-width:200px;
+  }
+  .mainnav.open{display:flex}
+  .section-head{align-items:flex-start}
+  .controls{flex-wrap:wrap}
+
+  /* On narrower screens, reduce reserved left padding so header items remain visible */
+  .topbar-inner {
+    padding-left:80px;
+  }
+
+  /* fix the logo sizing & left offset for small screens */
+  .logo-link { top:10px; left:12px; }
+  .logo img { height:52px; }
+}
+@media (max-width:768px){
+  .card-media img{height:220px}
+  .masonry{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+  .topbar-inner { padding-left:72px; }
+  .logo img { height:48px; }
+}
+@media (max-width:420px){
+  .hero-text h1{font-size:22px}
+  .card-media img{height:180px}
+  .float-wa{left:auto;right:16px}
+  .contact-grid{grid-template-columns:1fr}
+  .controls{gap:6px}
+  .controls select, .controls input{font-size:14px;padding:8px}
+  .mainnav{right:12px;top:64px}
+  .wrap{padding:12px}
+  .hero-image{margin-bottom:14px}
+
+  /* smallest screens: make logo slightly smaller and reduce left padding so things fit */
+  .logo img { height:44px; }
+  .topbar-inner { padding-left:64px; }
+  .logo-link { top:8px; left:12px; }
+}
+
+
+
+/* CART SIDEBAR */
+.cart-sidebar{
+  position: fixed;
+  top: 0;
+  right: -380px;
+  width: 360px;
+  max-width: 90%;
+  height: 100%;
+  background: #fff;
+  box-shadow: -10px 0 30px rgba(0,0,0,.12);
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  transition: right .35s ease;
+}
+.cart-sidebar.open{ right: 0; }
+
+.cart-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px;
+  border-bottom:1px solid rgba(0,0,0,.08);
+}
+.cart-header button{
+  background:none;
+  border:0;
+  font-size:20px;
+  cursor:pointer;
+}
+
+.cart-items{
+  flex:1;
+  overflow:auto;
+  padding:12px;
+}
+.cart-item{
+  display:flex;
+  gap:10px;
+  margin-bottom:12px;
+}
+.cart-item img{
+  width:60px;
+  height:70px;
+  object-fit:cover;
+  border-radius:8px;
+}
+.cart-item h4{
+  margin:0;
+  font-size:14px;
+}
+.cart-item span{
+  font-size:13px;
+  color:#666;
+}
+
+.cart-footer{
+  padding:12px;
+  border-top:1px solid rgba(0,0,0,.08);
+}
+
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.35);
+  display:none;
+  z-index:250;
+}
+.overlay.show{ display:block; }
+
+
+
+
+
+
+.img-modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.8);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:400;
+}
+.img-modal img{
+  max-width:90%;
+  max-height:90%;
+  border-radius:12px;
+}
+.img-modal span{
+  position:absolute;
+  top:20px;
+  right:25px;
+  color:#fff;
+  font-size:28px;
+  cursor:pointer;
+}
+.img-modal.show{ display:flex; }
+
+
+
+
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,Arial;
+  background:#f4f6f8;
+}
+.admin-wrap{
+  max-width:900px;
+  margin:auto;
+  padding:20px;
+}
+h2,h3{margin-top:0}
+
+.card{
+  background:#fff;
+  padding:16px;
+  border-radius:12px;
+  box-shadow:0 10px 25px rgba(0,0,0,.08);
+  margin-bottom:20px;
+}
+label{
+  font-weight:600;
+  margin-top:10px;
+  display:block;
+}
+input, textarea, select{
+  width:100%;
+  padding:10px;
+  margin-top:6px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+textarea{min-height:80px}
+
+button{
+  margin-top:12px;
+  padding:10px;
+  background:#c79b7a;
+  border:0;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.list{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:14px;
+}
+
+.item{
+  background:#fff;
+  padding:12px;
+  border-radius:10px;
+  box-shadow:0 8px 20px rgba(0,0,0,.06);
+}
+.item img{
+  width:100%;
+  height:160px;
+  object-fit:cover;
+  border-radius:8px;
+}
+.item h4{margin:8px 0 4px}
+.item small{color:#666}
+
+.item-actions{
+  display:flex;
+  gap:8px;
+  margin-top:8px;
+}
+.item-actions button{
+  flex:1;
+  background:#eee;
+}
+.item-actions .del{
+  background:#ff4d4d;
+  color:#fff;
+}
+
+
+
+/* ================= ADMIN HEADER ================= */
+
+.admin-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:20px 0 10px;
+  gap:10px;
+}
+
+.danger-btn{
+  background:#ff4d4d;
+  color:#fff;
+  border:none;
+  padding:10px 14px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600;
+  box-shadow:0 6px 18px rgba(255,77,77,.35);
+}
+
+.danger-btn:hover{
+  background:#e63b3b;
+}

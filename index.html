@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>HHH Traders — Boutique Collection | Wholesale & Retail</title>
+  <meta name="description" content="HHH Traders — Premium cotton dress materials. Wholesale & retail. Contact via WhatsApp or Call to order.">
+  <link rel="icon" href="assets/favicon.png" />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Floating WhatsApp -->
+  <a id="float-wa" class="float-wa" href="https://wa.me/919021278856" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">⚡ WhatsApp</a>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a href="#home" class="logo-link" aria-label="HHH Traders home">
+       <a href="#home" class="logo" aria-label="HHH Traders home">
+  <img src="assets/logo.png" alt="HHH Traders Logo">
+</a>
+
+      </a>
+
+      <button id="hamburger" class="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
+
+      <nav class="mainnav" id="mainnav" role="navigation" aria-label="Main navigation">
+        <a href="#home">Home</a>
+        <a href="#products">Shop</a>
+        <!--<a href="#services">Services</a>-->
+        <a href="#testimonials">Testimonials</a>
+        <a href="#contact">Contact</a>
+      </nav>
+
+      <div class="actions">
+        <button id="cart-toggle" class="btn small ghost" aria-haspopup="true">Cart (<span id="cart-count">0</span>)</button>
+        <a class="btn small" href="tel:+919588686992">Call</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section id="home" class="hero">
+    <div class="wrap hero-inner">
+      <div class="hero-text reveal">
+        <h1>HHH Traders — <span class="accent">Curated Fabrics</span></h1>
+        <p class="lead">Wholesale & Retail • Fancy cotton dress materials for ladies</p>
+        <div class="hero-ctas">
+          <a class="btn" href="#products">Explore Collection</a>
+          <a class="btn ghost" href="https://wa.me/919021278856" target="_blank" rel="noopener">Message on WhatsApp</a>
+        </div>
+        <div class="trust">
+          <span class="badge">Free shipping over ₹5,000*</span>
+          <span class="badge">7-day returns</span>
+        </div>
+      </div>
+      <div class="hero-image reveal">
+        <!-- If you accidentally used the logo as the hero image, this will now be constrained so it doesn't overflow -->
+        <img src="assets/hero.jpg" alt="Clothing showcase" loading="lazy">
+      </div>
+    </div>
+  </section>
+
+  <main class="wrap">
+    <!-- Controls -->
+    <section id="products" class="section">
+      <div class="section-head">
+        <h2>Collection</h2>
+        <div class="controls">
+          <select id="cat">
+            <option value="all">All categories</option>
+            <option value="dresses">Dresses</option>
+            <option value="sarees">Sarees</option>
+            <option value="mens">Men</option>
+            <option value="kids">Kids</option>
+            <option value="blouse">Blouse Pieces</option>
+          </select>
+          <input id="search" type="search" placeholder="Search products..." />
+          <select id="sort">
+            <option value="featured">Sort: Featured</option>
+            <option value="low">Price: Low → High</option>
+            <option value="high">Price: High → Low</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Product grid -->
+      <div id="masonry" class="masonry">
+        <!-- Example product card -->
+        <article class="card" data-id="p1" data-title="Blue Cotton Dress" data-img="images/blue-dress.jpg" data-price="499" data-cat="dresses">
+          <div class="card-media">
+            <img src="image/blue-dress-thumb.png" alt="Blue Cotton Dress" loading="lazy">
+          </div>
+          <div class="card-body">
+            <h3>Cotton Dress</h3>
+            <p class="muted">Fancy cotton dress — wholesale & retail.</p>
+            <div class="meta">
+              <span class="price">₹499</span>
+              <div class="actions-inline">
+                <button class="btn tiny view">View</button>
+                <button class="btn tiny add">Add</button>
+              </div>
+            </div>
+            <!-- WhatsApp below product (exactly as requested) -->
+            <button class="btn wa-product" data-phone="919021278856" data-img="images/blue-dress.jpg">Send on WhatsApp</button>
+          </div>
+        </article>
+
+        <article class="card" data-id="p2" data-title="Red Kurta" data-img="images/red-kurta.jpg" data-price="599" data-cat="dresses">
+          <div class="card-media"><img src="image/Screenshot 2025-11-19 224734.png" alt="Red Kurta" loading="lazy"></div>
+          <div class="card-body">
+            <h3>Kurta's</h3>
+            <p class="muted">Comfortable and stylish kurta.</p>
+            <div class="meta"><span class="price">₹599</span>
+              <div class="actions-inline"><button class="btn tiny view">View</button><button class="btn tiny add">Add</button></div>
+            </div>
+            <button class="btn wa-product" data-phone="919021278856" data-img="images/red-kurta.jpg">Send on WhatsApp</button>
+          </div>
+        </article>
+
+        <article class="card" data-id="p3" data-title="Printed Saree" data-img="images/printed-saree.jpg" data-price="999" data-cat="sarees">
+          <div class="card-media"><img src="image/saari.webp" alt="Printed Saree" loading="lazy"></div>
+          <div class="card-body">
+            <h3>Printed Saree</h3>
+            <p class="muted">Elegant printed saree for all occasions.</p>
+            <div class="meta"><span class="price">₹999</span>
+              <div class="actions-inline"><button class="btn tiny view">View</button><button class="btn tiny add">Add</button></div>
+            </div>
+            <button class="btn wa-product" data-phone="919021278856" data-img="images/printed-saree.jpg">Send on WhatsApp</button>
+          </div>
+        </article>
+
+        <!-- add more product cards as needed -->
+      </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="section" id=testimonials>
+      <h2>Testimonials</h2>
+      <div class="testimonial-grid">
+        <blockquote>“Great quality & quick delivery.” <cite>— M. Khan</cite></blockquote>
+        <blockquote>“Friendly seller and good prices.” <cite>— A. Mehta</cite></blockquote>
+      </div>
+    </section>
+
+    
+    <!-- Contact & Form -->
+    <section id="contact" class="section contact-section">
+      <div class="contact-grid">
+        <div class="contact-info">
+          <h2>Contact & Visit</h2>
+          <p><strong>WhatsApp:</strong> <a href="https://wa.me/919021278856" target="_blank">+91 90212 78856</a></p>
+          <p><strong>Call:</strong> <a href="tel:+919588686992">+91 95886 86992</a></p>
+          <p><strong>Email:</strong> <a href="mailto:weeqarkhan1901@gmail.com">weeqarkhan1901@gmail.com</a></p>
+          <p><strong>Address:</strong><br>Kinnari power house<br>Umarwada juna depo<br>Plot no 191</p>
+          <div class="trust small">
+            <span class="badge">Trusted seller</span>
+            <span class="badge">Quick WhatsApp replies</span>
+          </div>
+        </div>
+
+        <div class="contact-form-card">
+          <h3>Send us a message</h3>
+          <form id="contact-form">
+            <div class="row">
+              <input id="cf-name" type="text" placeholder="Your name" required>
+              <input id="cf-phone" type="tel" placeholder="Phone" required >
+            </div>
+            <input id="cf-email" type="email" placeholder="Email (optional)" >
+            <textarea id="cf-message" rows="5" placeholder="Message (what item, qty, city) — required" required></textarea>
+            <div class="form-actions">
+              <!-- this will open WhatsApp with the message contents -->
+              <button type="button" id="contact-whatsapp" class="btn">Send via WhatsApp</button>
+              <button type="reset" class="btn ghost">Clear</button>
+            </div>
+            <p class="small muted">We use WhatsApp to reply quickly. No payments or shipping here yet.</p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <strong>HHH Traders</strong><br>
+        Wholesale & Retail • Fancy Cotton Dress Material
+      </div>
+      <div class="small muted">&copy; <span id="year"></span> HHH Traders — All rights reserved.</div>
+    </div>
+
+
+
+    <!-- CART SIDEBAR -->
+<aside id="cart-sidebar" class="cart-sidebar">
+  <div class="cart-header">
+    <h3>Your Cart</h3>
+    <button id="cart-close">✕</button>
+  </div>
+
+  <div id="cart-items" class="cart-items">
+    <!-- JS se items aayenge -->
+  </div>
+
+  <div class="cart-footer">
+    <strong>Total: ₹<span id="cart-total">0</span></strong>
+    <button id="cart-wa" class="btn full-width-mobile">Order on WhatsApp</button>
+  </div>
+</aside>
+
+<div id="overlay" class="overlay"></div>
+
+
+
+
+<!-- IMAGE MODAL -->
+<div id="img-modal" class="img-modal">
+  <span id="img-close">✕</span>
+  <img id="img-zoom">
+</div>
+
+
+  </footer>
+
+  <script src="script.js"></script>
+
+
+  <script>
+document.getElementById("contact-whatsapp").addEventListener("click", function () {
+
+  const name = document.getElementById("cf-name").value.trim();
+  const phone = document.getElementById("cf-phone").value.trim();
+  const email = document.getElementById("cf-email").value.trim();
+  const message = document.getElementById("cf-message").value.trim();
+
+  if (!name || !phone || !message) {
+    alert("Please fill required fields");
+    return;
+  }
+
+  const text =
+    `Hello HHH Traders 👋\n\n` +
+    `Name: ${name}\n` +
+    `Phone: ${phone}\n` +
+    (email ? `Email: ${email}\n` : ``) +
+    `Message: ${message}`;
+
+  const whatsappNumber = "919021278856"; // ✅ your WhatsApp number
+  const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`;
+
+  window.open(url, "_blank");
+});
+</script>
+
+
+
+
+</body>
+</html>

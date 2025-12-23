@@ -215,45 +215,48 @@ const API_BASE = "http://127.0.0.1:8000";
 const API_URL = `${API_BASE}/api/products/`;
 
 // ================= LOAD PRODUCTS =================
-async function loadProducts(){
-  const res = await fetch(API_URL);
-  const data = await res.json();
+async function loadProducts() {
+  try {
+    const res = await fetch(API_URL);
+    const data = await res.json();
 
-  const grid = document.getElementById("masonry");
-  grid.innerHTML = "";
+    const grid = document.getElementById("masonry");
+    grid.innerHTML = ""; // Clear the hardcoded static products
 
-  data.forEach(p=>{
-    if(!p.is_active) return;
+    data.forEach(p => {
+      if (!p.is_active) return;
 
-    grid.innerHTML += `
-      <article class="card"
-        data-id="${p.id}"
-        data-title="${p.title}"
-        data-price="${p.price}">
-
-        <div class="card-media">
-          <img src="${API_BASE}${p.image}" alt="${p.title}">
-        </div>
-
-        <div class="card-body">
-          <h3>${p.title}</h3>
-          <p class="muted">${p.description || ""}</p>
-
-          <div class="meta">
-            <span class="price">₹${p.price}</span>
-            <div class="actions-inline">
-              <button class="btn tiny view">View</button>
-              <button class="btn tiny add">Add</button>
-            </div>
+      grid.innerHTML += `
+        <article class="card" 
+          data-id="${p.id}" 
+          data-title="${p.title}" 
+          data-price="${p.price}">
+          
+          <div class="card-media">
+            <img src="${p.image}" alt="${p.title}">
           </div>
+          <div class="card-body">
+            <h3>${p.title}</h3>
+            <p class="muted">${p.description || ""}</p>
+            <div class="meta">
+              <span class="price">₹${p.price}</span>
+              <div class="actions-inline">
+                <button class="btn tiny view">View</button>
+                <button class="btn tiny add">Add</button>
+              </div>
+            </div>
+            <button class="btn wa-product">Send on WhatsApp</button>
+          </div>
+        </article>
+      `;
+    });
 
-          <button class="btn wa-product">Send on WhatsApp</button>
-        </div>
-      </article>
-    `;
-  });
+    // VERY IMPORTANT: This makes the buttons work after loading from API
+    bindProductEvents(); 
 
-  bindProductEvents();
+  } catch (error) {
+    console.error("Error loading products:", error);
+  }
 }
 
 // ================= EVENTS =================

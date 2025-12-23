@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-hhh-traders-ziyan-123456789'
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']   # dev ke liye (Netlify / localhost sab allow)
 
@@ -22,7 +22,6 @@ INSTALLED_APPS = [
 
     # third party
     'rest_framework',
-    'corsheaders',
 
     # local
     'shop',
@@ -78,6 +77,9 @@ DATABASES = {
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -100,4 +102,3 @@ import os
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-

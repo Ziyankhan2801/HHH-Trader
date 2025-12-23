@@ -2,4 +2,3 @@ Django==5.2.6
 gunicorn
 whitenoise
 djangorestframework
-django-cors-headers

@@ -20,19 +20,17 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # third party
     'rest_framework',
-
-    # local
+    'corsheaders',   # 👈 ADD THIS
     'shop',
 ]
 
 # ================== MIDDLEWARE ==================
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -101,3 +99,6 @@ import os
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+CORS_ALLOW_ALL_ORIGINS = True

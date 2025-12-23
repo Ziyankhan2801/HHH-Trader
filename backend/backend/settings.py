@@ -30,7 +30,6 @@ INSTALLED_APPS = [
 # ================== MIDDLEWARE ==================
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # 🔥 FRONTEND CONNECT KEY
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -42,7 +41,6 @@ MIDDLEWARE = [
 
 # ================== CORS ==================
 
-CORS_ALLOW_ALL_ORIGINS = True   # dev ke liye
 CORS_ALLOW_CREDENTIALS = True
 
 # ================== TEMPLATES ==================

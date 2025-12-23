@@ -211,7 +211,7 @@ if(burger && nav){
 
 
 // ================= API CONFIG =================
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = "https://hhh-trader-backend.onrender.com";
 const API_URL = `${API_BASE}/api/products/`;
 
 // ================= LOAD PRODUCTS =================
@@ -297,4 +297,9 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
 
 
-  
+fetch(`${API_BASE}/api/products/`)
+  .then(res => res.json())
+  .then(data => {
+    console.log(data);   // pehle sirf check
+  })
+  .catch(err => console.error(err));

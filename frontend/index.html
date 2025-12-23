@@ -15,10 +15,10 @@
   <!-- Topbar -->
   <header class="topbar">
     <div class="wrap topbar-inner">
-      <a href="#home" class="logo-link" aria-label="HHH Traders home">
-       <a href="#home" class="logo" aria-label="HHH Traders home">
-  <img src="assets/logo.png" alt="HHH Traders Logo">
+      <a href="#home" class="logo-link logo">
+  <img src="/assets/logo.png" alt="HHH Traders Logo">
 </a>
+
 
       </a>
 
@@ -56,7 +56,7 @@
       </div>
       <div class="hero-image reveal">
         <!-- If you accidentally used the logo as the hero image, this will now be constrained so it doesn't overflow -->
-        <img src="assets/hero.jpg" alt="Clothing showcase" loading="lazy">
+        <img src="/assets/hero.jpg" alt="Clothing showcase" loading="lazy">
       </div>
     </div>
   </section>
@@ -89,7 +89,7 @@
         <!-- Example product card -->
         <article class="card" data-id="p1" data-title="Blue Cotton Dress" data-img="images/blue-dress.jpg" data-price="499" data-cat="dresses">
           <div class="card-media">
-            <img src="image/blue-dress-thumb.png" alt="Blue Cotton Dress" loading="lazy">
+            <img src="/image/blue-dress-thumb.png" alt="Blue Cotton Dress" loading="lazy">
           </div>
           <div class="card-body">
             <h3>Cotton Dress</h3>
@@ -107,7 +107,7 @@
         </article>
 
         <article class="card" data-id="p2" data-title="Red Kurta" data-img="images/red-kurta.jpg" data-price="599" data-cat="dresses">
-          <div class="card-media"><img src="image/Screenshot 2025-11-19 224734.png" alt="Red Kurta" loading="lazy"></div>
+          <div class="card-media"><img src="/image/Screenshot 2025-11-19 224734.png" alt="Red Kurta" loading="lazy"></div>
           <div class="card-body">
             <h3>Kurta's</h3>
             <p class="muted">Comfortable and stylish kurta.</p>
@@ -119,7 +119,7 @@
         </article>
 
         <article class="card" data-id="p3" data-title="Printed Saree" data-img="images/printed-saree.jpg" data-price="999" data-cat="sarees">
-          <div class="card-media"><img src="image/saari.webp" alt="Printed Saree" loading="lazy"></div>
+          <div class="card-media"><img src="/image/saari.webp" alt="Printed Saree" loading="lazy"></div>
           <div class="card-body">
             <h3>Printed Saree</h3>
             <p class="muted">Elegant printed saree for all occasions.</p>
@@ -182,16 +182,45 @@
   </main>
 
   <!-- Footer -->
-  <footer class="site-footer">
-    <div class="wrap footer-inner">
-      <div>
-        <strong>HHH Traders</strong><br>
+ <!-- Footer -->
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+
+    <!-- Brand -->
+    <div class="footer-brand">
+      <strong>HHH Traders</strong>
+      <p class="small muted">
         Wholesale & Retail • Fancy Cotton Dress Material
-      </div>
-      <div class="small muted">&copy; <span id="year"></span> HHH Traders — All rights reserved.</div>
+      </p>
     </div>
 
+    <!-- Quick Links -->
+    <div class="footer-links">
+      <a href="#products">Shop</a>
+      <a href="#contact">Contact</a>
+      <a href="https://wa.me/919021278856" target="_blank">WhatsApp</a>
+    </div>
 
+    <!-- Social Media -->
+    <div class="footer-social">
+      <a href="https://wa.me/919021278856" target="_blank" aria-label="WhatsApp">
+        <img src="/assets/icons/whatsapp.svg" alt="WhatsApp">
+      </a>
+      <a href="https://www.instagram.com/hhh_traders_?igsh=aW80ZmRqdm5ndnM4&utm_source=ig_contact_invite" target="_blank" aria-label="Instagram">
+        <img src="/assets/icons/instagram.svg" alt="Instagram">
+      </a>
+      <a href="https://www.facebook.com/share/1bUTPpbcL9/" target="_blank" aria-label="Facebook">
+        <img src="/assets/icons/facebook.svg" alt="Facebook">
+      </a>
+    </div>
+
+  </div>
+
+  <!-- Bottom line -->
+  <div class="footer-bottom small muted">
+    © <span id="year"></span> HHH Traders — All rights reserved.
+  </div>
+</footer>
 
     <!-- CART SIDEBAR -->
 <aside id="cart-sidebar" class="cart-sidebar">
@@ -206,7 +235,16 @@
 
   <div class="cart-footer">
     <strong>Total: ₹<span id="cart-total">0</span></strong>
-    <button id="cart-wa" class="btn full-width-mobile">Order on WhatsApp</button>
+    <button onclick="orderWhatsApp()" class="btn-wa">
+  Order on WhatsApp
+</button>
+
+<button onclick="clearCart()" class="btn ghost small full-width-mobile">
+  Clear Cart
+</button>
+
+
+
   </div>
 </aside>
 
@@ -247,7 +285,7 @@ document.getElementById("contact-whatsapp").addEventListener("click", function (
     (email ? `Email: ${email}\n` : ``) +
     `Message: ${message}`;
 
-  const whatsappNumber = "919021278856"; // ✅ your WhatsApp number
+  const whatsappNumber = "919021278856";
   const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`;
 
   window.open(url, "_blank");

@@ -90,8 +90,8 @@ Commercial reuse or redistribution without permission is strictly prohibited.
 Full Stack Web Developer  
 
 - 🌐 Portfolio: https://ziyankhan.netlify.app/  
-- 💼 LinkedIn: https://linkedin.com/in/your-profile  
-- 💻 GitHub: https://github.com/your-username  
+- 💼 LinkedIn: https://www.linkedin.com/in/ziyan-khan-b479332a7
+- 💻 GitHub: https://github.com/Ziyankhan2801  
 
 ---
 

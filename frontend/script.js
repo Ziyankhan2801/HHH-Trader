@@ -48,13 +48,12 @@ async function loadProducts() {
           data-price="${p.price}">
 
           <div class="card-media">
-            <img src="${API_BASE}${p.image}" alt="${p.title}">
+            <img src="${p.image}" alt="${p.title}">
           </div>
 
           <div class="card-body">
             <h3>${p.title}</h3>
-            <p class="muted">${p.description || ""}</p>
-
+            <p class="muted">${p.description || "No description available"}</p>
             <div class="meta">
               <span class="price">₹${p.price}</span>
               <div class="actions-inline">

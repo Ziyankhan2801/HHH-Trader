@@ -1,14 +1,14 @@
 from pathlib import Path
 
+# ================== BASE ==================
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ================== SECURITY ==================
 
 SECRET_KEY = 'django-insecure-hhh-traders-ziyan-123456789'
-
 DEBUG = True
-
-ALLOWED_HOSTS = ['*']   # dev ke liye (Netlify / localhost sab allow)
+ALLOWED_HOSTS = ['*']
 
 # ================== APPS ==================
 
@@ -21,7 +21,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
-    'corsheaders',   # 👈 ADD THIS
+    'corsheaders',
+
+    'cloudinary',
+    'cloudinary_storage',
+
     'shop',
 ]
 
@@ -38,11 +42,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-
-# ================== CORS ==================
-
-CORS_ALLOW_CREDENTIALS = True
 
 # ================== TEMPLATES ==================
 
@@ -71,34 +70,38 @@ DATABASES = {
     }
 }
 
-# ================== STATIC / MEDIA ==================
+# ================== STATIC ==================
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# ================== CLOUDINARY (THIS IS THE KEY) ==================
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": "dig4oky6d",
+    "API_KEY": "679354231392459",
+    "API_SECRET": "SI2okyRkiT69BKDNJKf5PA2o0po",
+}
+
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+# ❌ NOTHING ELSE (NO cloudinary.config, NO MEDIA_ROOT)
 
 # ================== CORE ==================
 
 ROOT_URLCONF = 'backend.urls'
-
 WSGI_APPLICATION = 'backend.wsgi.application'
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Asia/Kolkata'
-
 USE_I18N = True
 USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
-import os
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-
-CORS_ALLOW_ALL_ORIGINS = True

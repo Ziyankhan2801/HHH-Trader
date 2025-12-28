@@ -38,22 +38,32 @@ async function loadProducts() {
     const products = await res.json();
 
     const grid = document.getElementById("masonry");
+
+    // ⛔️ IMPORTANT: HTML me static cards NA ho
+    // Sirf JS se render hoga
     grid.innerHTML = "";
 
     products.forEach(p => {
-      grid.innerHTML += `
+      grid.insertAdjacentHTML("beforeend", `
         <article class="card"
           data-id="${p.id}"
           data-title="${p.title}"
           data-price="${p.price}">
 
           <div class="card-media">
-            <img src="${p.image}" alt="${p.title}">
+            <img 
+              src="${p.image}" 
+              alt="${p.title}" 
+              loading="lazy"
+            >
           </div>
 
           <div class="card-body">
             <h3>${p.title}</h3>
-            <p class="muted">${p.description || "No description available"}</p>
+            <p class="muted">
+              ${p.description || "No description available"}
+            </p>
+
             <div class="meta">
               <span class="price">₹${p.price}</span>
               <div class="actions-inline">
@@ -62,10 +72,12 @@ async function loadProducts() {
               </div>
             </div>
 
-            <button class="btn wa-product">Send on WhatsApp</button>
+            <button class="btn wa-product">
+              Send on WhatsApp
+            </button>
           </div>
         </article>
-      `;
+      `);
     });
 
     bindProductEvents();
@@ -74,6 +86,7 @@ async function loadProducts() {
     console.error("❌ API Error:", err);
   }
 }
+
 
 // ================= PRODUCT EVENTS =================
 function bindProductEvents(){

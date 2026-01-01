@@ -1,5 +1,6 @@
 // ================= CONFIG =================
 const CART_KEY = "hhh_cart";
+const PRODUCTS_KEY = "hhh_products_cache";
 const WHATSAPP_NUMBER = "919021278856";
 
 // 🔥 BACKEND (RENDER)
@@ -10,7 +11,7 @@ const API_URL = `${API_BASE}/api/products/`;
 document.addEventListener("DOMContentLoaded", () => {
   initRevealObserver();
   initCartUI();
-  loadProducts();
+  loadProducts();   // 🔥 cached + backend safe
   renderCart();
 });
 
@@ -31,62 +32,78 @@ function initRevealObserver(){
   items.forEach(el=>observer.observe(el));
 }
 
-// ================= LOAD PRODUCTS FROM API =================
-async function loadProducts() {
-  try {
-    const res = await fetch(API_URL);
-    const products = await res.json();
-
-    const grid = document.getElementById("masonry");
-
-    // ⛔️ IMPORTANT: HTML me static cards NA ho
-    // Sirf JS se render hoga
-    grid.innerHTML = "";
-
-    products.forEach(p => {
-      grid.insertAdjacentHTML("beforeend", `
-        <article class="card"
-          data-id="${p.id}"
-          data-title="${p.title}"
-          data-price="${p.price}">
-
-          <div class="card-media">
-            <img 
-              src="${p.image}" 
-              alt="${p.title}" 
-              loading="lazy"
-            >
-          </div>
-
-          <div class="card-body">
-            <h3>${p.title}</h3>
-            <p class="muted">
-              ${p.description || "No description available"}
-            </p>
-
-            <div class="meta">
-              <span class="price">₹${p.price}</span>
-              <div class="actions-inline">
-                <button class="btn tiny view">View</button>
-                <button class="btn tiny add">Add</button>
-              </div>
-            </div>
-
-            <button class="btn wa-product">
-              Send on WhatsApp
-            </button>
-          </div>
-        </article>
-      `);
-    });
-
-    bindProductEvents();
-
-  } catch (err) {
-    console.error("❌ API Error:", err);
-  }
+// ================= PRODUCT CACHE =================
+function saveProductsCache(products){
+  localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
 }
 
+function getProductsCache(){
+  return JSON.parse(localStorage.getItem(PRODUCTS_KEY)) || [];
+}
+
+// ================= RENDER PRODUCTS =================
+function renderProducts(products){
+  const grid = document.getElementById("masonry");
+  if(!grid) return;
+
+  grid.innerHTML = "";
+
+  products.forEach(p => {
+    grid.insertAdjacentHTML("beforeend", `
+      <article class="card"
+        data-id="${p.id}"
+        data-title="${p.title}"
+        data-price="${p.price}">
+
+        <div class="card-media">
+          <img src="${p.image}" alt="${p.title}" loading="lazy">
+        </div>
+
+        <div class="card-body">
+          <h3>${p.title}</h3>
+          <p class="muted">${p.description || "No description available"}</p>
+
+          <div class="meta">
+            <span class="price">₹${p.price}</span>
+            <div class="actions-inline">
+              <button class="btn tiny view">View</button>
+              <button class="btn tiny add">Add</button>
+            </div>
+          </div>
+
+          <button class="btn wa-product">Send on WhatsApp</button>
+        </div>
+      </article>
+    `);
+  });
+
+  bindProductEvents();
+}
+
+// ================= LOAD PRODUCTS (SAFE) =================
+async function loadProducts() {
+
+  // ✅ 1. pehle cached products dikhao
+  const cached = getProductsCache();
+  if (cached.length) {
+    renderProducts(cached);
+  }
+
+  try {
+    const res = await fetch(API_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error("API down");
+
+    const products = await res.json();
+
+    // ✅ 2. backend success → update UI + cache
+    renderProducts(products);
+    saveProductsCache(products);
+
+  } catch (err) {
+    console.warn("⚠ Backend down — cached products visible");
+    // ❌ kuch bhi clear nahi hoga
+  }
+}
 
 // ================= PRODUCT EVENTS =================
 function bindProductEvents(){
@@ -148,6 +165,8 @@ function renderCart(){
   const totalBox = document.getElementById("cart-total");
   const count = document.getElementById("cart-count");
 
+  if(!box) return;
+
   let total = 0;
   box.innerHTML = "";
 
@@ -186,6 +205,8 @@ function initCartUI(){
   const close = document.getElementById("cart-close");
   const overlay = document.getElementById("overlay");
 
+  if(!toggle) return;
+
   toggle.onclick = ()=>{
     sidebar.classList.add("open");
     overlay.classList.add("show");
@@ -223,12 +244,6 @@ function removeItem(index){
   const cart = getCart();
   cart.splice(index,1);
   saveCart(cart);
-  renderCart();
-}
-
-function clearCart(){
-  if(!confirm("Clear all items?")) return;
-  localStorage.removeItem(CART_KEY);
   renderCart();
 }
 

@@ -11,7 +11,7 @@ const API_URL = `${API_BASE}/api/products/`;
 document.addEventListener("DOMContentLoaded", () => {
   initRevealObserver();
   initCartUI();
-  loadProducts();   // 🔥 cached + backend safe
+  loadProducts(); // ✅ SAFE LOAD
   renderCart();
 });
 
@@ -34,11 +34,16 @@ function initRevealObserver(){
 
 // ================= PRODUCT CACHE =================
 function saveProductsCache(products){
+  if (!Array.isArray(products) || products.length === 0) return;
   localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
 }
 
 function getProductsCache(){
-  return JSON.parse(localStorage.getItem(PRODUCTS_KEY)) || [];
+  try {
+    return JSON.parse(localStorage.getItem(PRODUCTS_KEY)) || [];
+  } catch {
+    return [];
+  }
 }
 
 // ================= RENDER PRODUCTS =================
@@ -80,10 +85,10 @@ function renderProducts(products){
   bindProductEvents();
 }
 
-// ================= LOAD PRODUCTS (SAFE) =================
+// ================= LOAD PRODUCTS (HARD SAFE) =================
 async function loadProducts() {
 
-  // ✅ 1. pehle cached products dikhao
+  // ✅ 1. pehle cache dikhao
   const cached = getProductsCache();
   if (cached.length) {
     renderProducts(cached);
@@ -95,13 +100,18 @@ async function loadProducts() {
 
     const products = await res.json();
 
-    // ✅ 2. backend success → update UI + cache
+    // 🛑 EMPTY / INVALID RESPONSE = IGNORE COMPLETELY
+    if (!Array.isArray(products) || products.length === 0) {
+      console.warn("⚠ Empty API response ignored");
+      return;
+    }
+
+    // ✅ only valid data allowed
     renderProducts(products);
     saveProductsCache(products);
 
   } catch (err) {
-    console.warn("⚠ Backend down — cached products visible");
-    // ❌ kuch bhi clear nahi hoga
+    console.warn("⚠ Backend issue — cache retained");
   }
 }
 

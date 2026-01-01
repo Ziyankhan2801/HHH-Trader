@@ -6,3 +6,5 @@ Pillow
 django-cors-headers
 cloudinary
 django-cloudinary-storage
+psycopg2-binary
+dj-database-url

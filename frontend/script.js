@@ -282,3 +282,10 @@ if(burger && nav){
       nav.classList.contains("open") ? "hidden" : "";
   };
 }
+
+
+function clearCart(){
+  if(!confirm("Are you sure you want to clear the cart?")) return;
+  localStorage.removeItem("hhh_cart");
+  renderCart();
+}

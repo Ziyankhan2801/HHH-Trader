@@ -289,3 +289,18 @@ function clearCart(){
   localStorage.removeItem("hhh_cart");
   renderCart();
 }
+
+
+// ✅ Close mobile nav on link click
+function closemenu() {
+  const nav = document.getElementById("mainnav");
+  const burger = document.getElementById("hamburger");
+
+  if (nav) nav.classList.remove("open");
+
+  // aria update (optional)
+  if (burger) burger.setAttribute("aria-expanded", "false");
+
+  // body scroll back
+  document.body.style.overflow = "";
+}

@@ -68,7 +68,11 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ]
 
+# ================== CSRF ==================
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://hhh-trader-backend.onrender.com",
+]
 
 
 

@@ -72,7 +72,7 @@ CORS_ALLOW_HEADERS = [
 
 CSRF_TRUSTED_ORIGINS = [
     "https://hhh-trader-backend.onrender.com",
-    "https://hhhtraders.netlify.app/",
+    "https://hhhtraders.netlify.app",
 ]
 
 
@@ -125,9 +125,9 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # ================== CLOUDINARY (THIS IS THE KEY) ==================
 
 CLOUDINARY_STORAGE = {
-    "CLOUD_NAME": os.getenv("CLOUD_NAME"),
-    "API_KEY": os.getenv("CLOUD_API_KEY"),
-    "API_SECRET": os.getenv("CLOUD_API_SECRET"),
+    "CLOUD_NAME": os.getenv("dig4oky6d"),
+    "API_KEY": os.getenv("456378156317596"),
+    "API_SECRET": os.getenv("pBSU2zAA7chzJjYxURUxp73OkcI"),
 }
 
 STORAGES = {

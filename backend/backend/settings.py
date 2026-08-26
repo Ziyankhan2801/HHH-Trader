@@ -13,8 +13,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ================== SECURITY ==================
 
-SECRET_KEY = 'django-insecure-hhh-traders-ziyan-123456789'
-DEBUG = True
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-local-dev-key")
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 ALLOWED_HOSTS = ['*']
 
 # ================== APPS ==================
@@ -120,9 +120,9 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # ================== CLOUDINARY (THIS IS THE KEY) ==================
 
 CLOUDINARY_STORAGE = {
-    "CLOUD_NAME": "dig4oky6d",
-    "API_KEY": "679354231392459",
-    "API_SECRET": "SI2okyRkiT69BKDNJKf5PA2o0po",
+    "CLOUD_NAME": os.getenv("CLOUD_NAME"),
+    "API_KEY": os.getenv("CLOUD_API_KEY"),
+    "API_SECRET": os.getenv("CLOUD_API_SECRET"),
 }
 
 STORAGES = {
@@ -147,3 +147,9 @@ USE_I18N = True
 USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# ================== MEDIA ==================
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"

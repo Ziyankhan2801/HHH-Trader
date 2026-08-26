@@ -72,6 +72,7 @@ CORS_ALLOW_HEADERS = [
 
 CSRF_TRUSTED_ORIGINS = [
     "https://hhh-trader-backend.onrender.com",
+    "https://hhhtraders.netlify.app/",
 ]
 
 

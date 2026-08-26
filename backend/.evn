@@ -1,4 +1,4 @@
 CLOUDINARY_CLOUD_NAME=dig4oky6d
 CLOUDINARY_API_KEY=456378156317596
 CLOUDINARY_API_SECRET=pBSU2zAA7chzJjYxURUxp73OkcI
-DATABASE_URL=postgresql://hhh_traders_db_trm7_user:vSBY2Rc5gJWT6p4tgHlmuEw9WiOfTyNU@dpg-d8gmau0jo6nc73enhpgg-a.virginia-postgres.render.com/hhh_traders_db_trm7
+DATABASE_URL=postgresql://neondb_owner:npg_sLX0TodHDl1W@ep-autumn-sky-axawv299.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require

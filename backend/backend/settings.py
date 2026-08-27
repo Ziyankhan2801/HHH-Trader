@@ -135,9 +135,9 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # ================= CLOUDINARY =================
 
 CLOUDINARY_STORAGE = {
-    "CLOUD_NAME": os.getenv("CLOUD_NAME"),
-    "API_KEY": os.getenv("CLOUD_API_KEY"),
-    "API_SECRET": os.getenv("CLOUD_API_SECRET"),
+    "CLOUD_NAME": os.getenv("dig4oky6d"),
+    "API_KEY": os.getenv("456378156317596"),
+    "API_SECRET": os.getenv("pBSU2zAA7chzJjYxURUxp73OkcI"),
 }
 
 STORAGES = {

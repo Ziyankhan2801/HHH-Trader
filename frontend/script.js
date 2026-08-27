@@ -87,31 +87,38 @@ function renderProducts(products){
 
 // ================= LOAD PRODUCTS (HARD SAFE) =================
 async function loadProducts() {
-
-  // ✅ 1. pehle cache dikhao
-  const cached = getProductsCache();
-  if (cached.length) {
-    renderProducts(cached);
-  }
-
   try {
-    const res = await fetch(API_URL, { cache: "no-store" });
-    if (!res.ok) throw new Error("API down");
+    const res = await fetch(API_URL, {
+      cache: "no-store"
+    });
+
+    if (!res.ok) {
+      throw new Error(`API error: ${res.status}`);
+    }
 
     const products = await res.json();
 
-    // 🛑 EMPTY / INVALID RESPONSE = IGNORE COMPLETELY
-    if (!Array.isArray(products) || products.length === 0) {
-      console.warn("⚠ Empty API response ignored");
-      return;
+    if (!Array.isArray(products)) {
+      throw new Error("Invalid API response");
     }
 
-    // ✅ only valid data allowed
+    // IMPORTANT:
+    // API ko hamesha source of truth maanenge.
+    // Product delete hua hai to frontend se bhi delete hoga.
     renderProducts(products);
-    saveProductsCache(products);
+
+    // API ki latest list cache me save karo
+    localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
 
   } catch (err) {
-    console.warn("⚠ Backend issue — cache retained");
+    console.error("Product API error:", err);
+
+    // Backend unavailable ho tabhi old cache dikhao
+    const cached = getProductsCache();
+
+    if (cached.length) {
+      renderProducts(cached);
+    }
   }
 }
 

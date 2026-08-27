@@ -1,16 +1,28 @@
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
+from rest_framework import serializers
 from .models import Product
-from .serializers import ProductSerializer   # 👈 ADD THIS
 
-@api_view(['GET'])
-def product_list(request):
-    products = Product.objects.all().order_by('-id')
 
-    serializer = ProductSerializer(
-        products,
-        many=True,
-        context={"request": request}
-    )
+class ProductSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
 
-    return Response(serializer.data)
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'title',
+            'description',
+            'price',
+            'category',
+            'image'
+        ]
+
+    def get_image(self, obj):
+        if not obj.image:
+            return None
+
+        request = self.context.get('request')
+
+        if request:
+            return request.build_absolute_uri(obj.image.url)
+
+        return obj.image.url

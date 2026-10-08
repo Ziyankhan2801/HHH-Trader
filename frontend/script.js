@@ -308,16 +308,39 @@ function initProductControls() {
   const sortSelect =
     document.getElementById("sort-products");
 
+  const clearButton =
+    document.getElementById("clear-filters");
+
+
   if (searchInput) {
-    searchInput.addEventListener("input", applyProductFilters);
+    searchInput.addEventListener(
+      "input",
+      applyProductFilters
+    );
   }
+
 
   if (categorySelect) {
-    categorySelect.addEventListener("change", applyProductFilters);
+    categorySelect.addEventListener(
+      "change",
+      applyProductFilters
+    );
   }
 
+
   if (sortSelect) {
-    sortSelect.addEventListener("change", applyProductFilters);
+    sortSelect.addEventListener(
+      "change",
+      applyProductFilters
+    );
+  }
+
+
+  if (clearButton) {
+    clearButton.addEventListener(
+      "click",
+      clearProductFilters
+    );
   }
 }
 

@@ -627,9 +627,13 @@ function bindProductEvents(){
       });
     };
 
-    card.querySelector(".view").onclick = ()=>{
-      openImage(card.querySelector("img").src);
-    };
+    card.querySelector(".view").onclick = () => {
+  const productId = card.dataset.id;
+
+  if (!productId) return;
+
+  window.location.href = `product.html?id=${encodeURIComponent(productId)}`;
+};
 
     card.querySelector(".wa-product").onclick = ()=>{
       const msg = `Hello, I want ${card.dataset.title}`;

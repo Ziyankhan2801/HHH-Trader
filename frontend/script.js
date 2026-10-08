@@ -3,6 +3,10 @@ const CART_KEY = "hhh_cart";
 const PRODUCTS_KEY = "hhh_products_cache";
 const WHATSAPP_NUMBER = "919021278856";
 
+// Product catalog state
+let allProducts = [];
+let filteredProducts = [];
+
 // 🔥 BACKEND (RENDER)
 const API_BASE = "https://hhh-trader-backend.onrender.com";
 const API_URL = `${API_BASE}/api/products/`;
@@ -11,7 +15,8 @@ const API_URL = `${API_BASE}/api/products/`;
 document.addEventListener("DOMContentLoaded", () => {
   initRevealObserver();
   initCartUI();
-  loadProducts(); // ✅ SAFE LOAD
+  initProductControls();
+  loadProducts();
   renderCart();
 });
 
@@ -33,50 +38,115 @@ function initRevealObserver(){
 }
 
 // ================= PRODUCT CACHE =================
-function saveProductsCache(products){
-  if (!Array.isArray(products) || products.length === 0) return;
-  localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
+// ================= PRODUCT CACHE =================
+function saveProductsCache(products) {
+  if (!Array.isArray(products)) return;
+
+  localStorage.setItem(
+    PRODUCTS_KEY,
+    JSON.stringify(products)
+  );
 }
 
-function getProductsCache(){
+function getProductsCache() {
   try {
-    return JSON.parse(localStorage.getItem(PRODUCTS_KEY)) || [];
+    const cached = JSON.parse(
+      localStorage.getItem(PRODUCTS_KEY)
+    );
+
+    return Array.isArray(cached) ? cached : [];
   } catch {
     return [];
   }
 }
 
 // ================= RENDER PRODUCTS =================
-function renderProducts(products){
+function renderProducts(products) {
   const grid = document.getElementById("masonry");
-  if(!grid) return;
+
+  if (!grid) return;
 
   grid.innerHTML = "";
 
+  if (!Array.isArray(products) || products.length === 0) {
+    renderEmptyState();
+    return;
+  }
+
   products.forEach(p => {
+    const title = escapeHTML(p.title || "Untitled Product");
+    const description = escapeHTML(
+      p.description || "No description available"
+    );
+    const category = escapeHTML(
+      p.category || "Uncategorized"
+    );
+
+    const image = p.image || "";
+
     grid.insertAdjacentHTML("beforeend", `
-      <article class="card"
+      <article
+        class="card"
         data-id="${p.id}"
-        data-title="${p.title}"
-        data-price="${p.price}">
+        data-title="${title}"
+        data-price="${Number(p.price) || 0}"
+        data-category="${category}"
+      >
 
         <div class="card-media">
-          <img src="${p.image}" alt="${p.title}" loading="lazy">
+          <img
+            src="${image}"
+            alt="${title}"
+            loading="lazy"
+            onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22600%22 height=%22400%22 viewBox=%220 0 600 400%22%3E%3Crect width=%22600%22 height=%22400%22 fill=%22%23eeeeee%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23666666%22 font-size=%2224%22%3ENo Image%3C/text%3E%3C/svg%3E'"
+          >
         </div>
 
         <div class="card-body">
-          <h3>${p.title}</h3>
-          <p class="muted">${p.description || "No description available"}</p>
+
+          <span class="product-category">
+            ${category}
+          </span>
+
+          <h3>${title}</h3>
+
+          <p class="muted">
+            ${description}
+          </p>
 
           <div class="meta">
-            <span class="price">₹${p.price}</span>
+
+            <span class="price">
+              ₹${Number(p.price) || 0}
+            </span>
+
             <div class="actions-inline">
-              <button class="btn tiny view">View</button>
-              <button class="btn tiny add">Add</button>
+
+              <button
+                class="btn tiny view"
+                type="button"
+              >
+                View
+              </button>
+
+              <button
+                class="btn tiny add"
+                type="button"
+              >
+                Add
+              </button>
+
             </div>
+
           </div>
 
-          <button class="btn wa-product">Send on WhatsApp</button>
+          <button
+            class="btn wa-product"
+            type="button"
+          >
+            Send on WhatsApp
+          </button>
+
         </div>
       </article>
     `);
@@ -85,8 +155,90 @@ function renderProducts(products){
   bindProductEvents();
 }
 
-// ================= LOAD PRODUCTS (HARD SAFE) =================
+// ================= HTML SAFETY =================
+function escapeHTML(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+
+// ================= EMPTY STATE =================
+function renderEmptyState(message = "No products found.") {
+  const grid = document.getElementById("masonry");
+
+  if (!grid) return;
+
+  grid.innerHTML = `
+    <div class="catalog-state empty-state">
+      <div class="state-icon">🛍️</div>
+      <h3>${escapeHTML(message)}</h3>
+      <p>
+        Try another search or select a different category.
+      </p>
+
+      <button
+        class="btn"
+        type="button"
+        onclick="clearProductFilters()"
+      >
+        Clear Filters
+      </button>
+    </div>
+  `;
+}
+
+
+// ================= LOADING STATE =================
+function renderLoadingState() {
+  const grid = document.getElementById("masonry");
+
+  if (!grid) return;
+
+  grid.innerHTML = `
+    <div class="catalog-state loading-state">
+      <div class="loader"></div>
+      <h3>Loading products...</h3>
+      <p>Please wait.</p>
+    </div>
+  `;
+}
+
+
+// ================= ERROR STATE =================
+function renderErrorState() {
+  const grid = document.getElementById("masonry");
+
+  if (!grid) return;
+
+  grid.innerHTML = `
+    <div class="catalog-state error-state">
+      <div class="state-icon">⚠️</div>
+
+      <h3>Unable to load products</h3>
+
+      <p>
+        Something went wrong while loading the products.
+      </p>
+
+      <button
+        class="btn"
+        type="button"
+        onclick="loadProducts()"
+      >
+        Try Again
+      </button>
+    </div>
+  `;
+}
+
+// ================= LOAD PRODUCTS =================
 async function loadProducts() {
+  renderLoadingState();
+
   try {
     const res = await fetch(API_URL, {
       cache: "no-store"
@@ -102,24 +254,268 @@ async function loadProducts() {
       throw new Error("Invalid API response");
     }
 
-    // IMPORTANT:
-    // API ko hamesha source of truth maanenge.
-    // Product delete hua hai to frontend se bhi delete hoga.
-    renderProducts(products);
+    // API is the source of truth
+    allProducts = products;
 
-    // API ki latest list cache me save karo
-    localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
+    // Initially show everything
+    filteredProducts = [...allProducts];
+
+    // Update cache, including empty response
+    saveProductsCache(allProducts);
+
+    populateCategories();
+    updateProductCount();
+    renderProducts(filteredProducts);
 
   } catch (err) {
     console.error("Product API error:", err);
 
-    // Backend unavailable ho tabhi old cache dikhao
+    // Only use cache when API is unavailable
     const cached = getProductsCache();
 
     if (cached.length) {
-      renderProducts(cached);
+      allProducts = cached;
+      filteredProducts = [...cached];
+
+      populateCategories();
+      updateProductCount();
+      renderProducts(filteredProducts);
+
+      showCatalogNotice(
+        "Showing saved products. Live server is unavailable."
+      );
+
+      return;
     }
+
+    allProducts = [];
+    filteredProducts = [];
+
+    renderErrorState();
+    updateProductCount();
   }
+}
+
+// ================= PRODUCT CONTROLS =================
+function initProductControls() {
+
+  const searchInput =
+    document.getElementById("product-search");
+
+  const categorySelect =
+    document.getElementById("category-filter");
+
+  const sortSelect =
+    document.getElementById("sort-products");
+
+  if (searchInput) {
+    searchInput.addEventListener("input", applyProductFilters);
+  }
+
+  if (categorySelect) {
+    categorySelect.addEventListener("change", applyProductFilters);
+  }
+
+  if (sortSelect) {
+    sortSelect.addEventListener("change", applyProductFilters);
+  }
+}
+
+
+// ================= POPULATE CATEGORIES =================
+function populateCategories() {
+
+  const select =
+    document.getElementById("category-filter");
+
+  if (!select) return;
+
+  const categories = [
+    ...new Set(
+      allProducts
+        .map(product => product.category)
+        .filter(Boolean)
+        .map(category => String(category).trim())
+    )
+  ].sort();
+
+  select.innerHTML = `
+    <option value="">All Categories</option>
+    ${categories.map(category => `
+      <option value="${escapeHTML(category)}">
+        ${escapeHTML(category)}
+      </option>
+    `).join("")}
+  `;
+}
+
+
+// ================= APPLY FILTERS =================
+function applyProductFilters() {
+
+  const searchInput =
+    document.getElementById("product-search");
+
+  const categorySelect =
+    document.getElementById("category-filter");
+
+  const sortSelect =
+    document.getElementById("sort-products");
+
+  const searchTerm =
+    searchInput?.value.trim().toLowerCase() || "";
+
+  const selectedCategory =
+    categorySelect?.value || "";
+
+  const sortValue =
+    sortSelect?.value || "latest";
+
+
+  // SEARCH + CATEGORY
+  filteredProducts = allProducts.filter(product => {
+
+    const title =
+      String(product.title || "").toLowerCase();
+
+    const description =
+      String(product.description || "").toLowerCase();
+
+    const category =
+      String(product.category || "");
+
+    const matchesSearch =
+      !searchTerm ||
+      title.includes(searchTerm) ||
+      description.includes(searchTerm) ||
+      category.toLowerCase().includes(searchTerm);
+
+    const matchesCategory =
+      !selectedCategory ||
+      category === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
+
+
+  // SORT
+  switch (sortValue) {
+
+    case "price-low":
+      filteredProducts.sort(
+        (a, b) => Number(a.price) - Number(b.price)
+      );
+      break;
+
+    case "price-high":
+      filteredProducts.sort(
+        (a, b) => Number(b.price) - Number(a.price)
+      );
+      break;
+
+    case "name-az":
+      filteredProducts.sort(
+        (a, b) =>
+          String(a.title || "").localeCompare(
+            String(b.title || "")
+          )
+      );
+      break;
+
+    case "name-za":
+      filteredProducts.sort(
+        (a, b) =>
+          String(b.title || "").localeCompare(
+            String(a.title || "")
+          )
+      );
+      break;
+
+    case "latest":
+    default:
+      filteredProducts.sort(
+        (a, b) => Number(b.id) - Number(a.id)
+      );
+      break;
+  }
+
+
+  updateProductCount();
+
+  renderProducts(filteredProducts);
+}
+
+
+// ================= CLEAR FILTERS =================
+function clearProductFilters() {
+
+  const searchInput =
+    document.getElementById("product-search");
+
+  const categorySelect =
+    document.getElementById("category-filter");
+
+  const sortSelect =
+    document.getElementById("sort-products");
+
+  if (searchInput) {
+    searchInput.value = "";
+  }
+
+  if (categorySelect) {
+    categorySelect.value = "";
+  }
+
+  if (sortSelect) {
+    sortSelect.value = "latest";
+  }
+
+  filteredProducts = [...allProducts];
+
+  updateProductCount();
+  renderProducts(filteredProducts);
+}
+
+
+// ================= PRODUCT COUNT =================
+function updateProductCount() {
+
+  const countElement =
+    document.getElementById("product-count");
+
+  if (!countElement) return;
+
+  countElement.textContent =
+    `${filteredProducts.length} product${filteredProducts.length === 1 ? "" : "s"}`;
+}
+
+
+// ================= CATALOG NOTICE =================
+function showCatalogNotice(message) {
+
+  const existing =
+    document.querySelector(".catalog-notice");
+
+  if (existing) {
+    existing.remove();
+  }
+
+  const grid =
+    document.getElementById("masonry");
+
+  if (!grid) return;
+
+  const notice = document.createElement("div");
+
+  notice.className = "catalog-notice";
+
+  notice.textContent = message;
+
+  grid.parentElement?.insertBefore(notice, grid);
+
+  setTimeout(() => {
+    notice.remove();
+  }, 5000);
 }
 
 // ================= PRODUCT EVENTS =================
@@ -160,8 +556,16 @@ document.getElementById("img-close")?.addEventListener("click",()=>{
 });
 
 // ================= CART =================
-function getCart(){
-  return JSON.parse(localStorage.getItem(CART_KEY)) || [];
+function getCart() {
+  try {
+    const cart = JSON.parse(
+      localStorage.getItem(CART_KEY)
+    );
+
+    return Array.isArray(cart) ? cart : [];
+  } catch {
+    return [];
+  }
 }
 
 function saveCart(cart){
@@ -241,17 +645,29 @@ function initCartUI(){
 }
 
 // ================= CART HELPERS =================
-function increaseQty(index){
+function increaseQty(index) {
   const cart = getCart();
+
+  if (!cart[index]) return;
+
   cart[index].qty++;
+
   saveCart(cart);
   renderCart();
 }
 
-function decreaseQty(index){
+
+function decreaseQty(index) {
   const cart = getCart();
+
+  if (!cart[index]) return;
+
   cart[index].qty--;
-  if(cart[index].qty <= 0) cart.splice(index,1);
+
+  if (cart[index].qty <= 0) {
+    cart.splice(index, 1);
+  }
+
   saveCart(cart);
   renderCart();
 }

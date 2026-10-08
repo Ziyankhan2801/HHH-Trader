@@ -374,8 +374,82 @@ function populateCategories() {
 
 
 // ================= APPLY FILTERS =================
-function applyProductFilters() {
 
+let filterRequestId = 0;
+
+async function applyProductFilters() {
+  const searchInput = document.getElementById("product-search");
+  const categorySelect = document.getElementById("category-filter");
+  const sortSelect = document.getElementById("sort-products");
+
+  const searchTerm =
+    searchInput?.value.trim() || "";
+
+  const selectedCategory =
+    categorySelect?.value || "";
+
+  const sortValue =
+    sortSelect?.value || "latest";
+
+  const requestId = ++filterRequestId;
+
+  renderLoadingState();
+
+  try {
+    const params = new URLSearchParams();
+
+    if (searchTerm) {
+      params.set("search", searchTerm);
+    }
+
+    if (selectedCategory) {
+      params.set("category", selectedCategory);
+    }
+
+    params.set("sort", sortValue);
+
+    const url = `${API_URL}?${params.toString()}`;
+
+    const res = await fetch(url, {
+      cache: "no-store"
+    });
+
+    if (!res.ok) {
+      throw new Error(`API error: ${res.status}`);
+    }
+
+    const products = await res.json();
+
+    if (!Array.isArray(products)) {
+      throw new Error("Invalid API response");
+    }
+
+    // Ignore older request if user typed quickly
+    if (requestId !== filterRequestId) {
+      return;
+    }
+
+    filteredProducts = products;
+
+    updateProductCount();
+
+    renderProducts(filteredProducts);
+
+  } catch (err) {
+    console.error("Filter API error:", err);
+
+    // Fallback to already loaded products
+    if (requestId !== filterRequestId) {
+      return;
+    }
+
+    applyLocalFilters();
+  }
+}
+
+// ================= LOCAL FILTER FALLBACK =================
+
+function applyLocalFilters() {
   const searchInput =
     document.getElementById("product-search");
 
@@ -394,8 +468,6 @@ function applyProductFilters() {
   const sortValue =
     sortSelect?.value || "latest";
 
-
-  // SEARCH + CATEGORY
   filteredProducts = allProducts.filter(product => {
 
     const title =
@@ -420,8 +492,6 @@ function applyProductFilters() {
     return matchesSearch && matchesCategory;
   });
 
-
-  // SORT
   switch (sortValue) {
 
     case "price-low":
@@ -462,15 +532,16 @@ function applyProductFilters() {
       break;
   }
 
-
   updateProductCount();
-
   renderProducts(filteredProducts);
 }
 
 
+
+
 // ================= CLEAR FILTERS =================
-function clearProductFilters() {
+
+async function clearProductFilters() {
 
   const searchInput =
     document.getElementById("product-search");
@@ -493,10 +564,7 @@ function clearProductFilters() {
     sortSelect.value = "latest";
   }
 
-  filteredProducts = [...allProducts];
-
-  updateProductCount();
-  renderProducts(filteredProducts);
+  await applyProductFilters();
 }
 
 

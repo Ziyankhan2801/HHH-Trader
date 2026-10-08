@@ -1,13 +1,50 @@
 from rest_framework import serializers
 
-from .models import Product
+from .models import Product, ProductImage
 
 
-class ProductSerializer(serializers.ModelSerializer):
+class ProductImageSerializer(serializers.ModelSerializer):
+
     image = serializers.SerializerMethodField()
 
     class Meta:
+        model = ProductImage
+        fields = [
+            'id',
+            'image',
+            'alt_text',
+        ]
+
+    def get_image(self, obj):
+
+        if not obj.image:
+            return None
+
+        try:
+            image_url = obj.image.url
+        except (ValueError, AttributeError):
+            return None
+
+        request = self.context.get('request')
+
+        if request:
+            return request.build_absolute_uri(image_url)
+
+        return image_url
+
+
+class ProductSerializer(serializers.ModelSerializer):
+
+    image = serializers.SerializerMethodField()
+
+    gallery_images = ProductImageSerializer(
+        many=True,
+        read_only=True
+    )
+
+    class Meta:
         model = Product
+
         fields = [
             'id',
             'title',
@@ -15,13 +52,10 @@ class ProductSerializer(serializers.ModelSerializer):
             'price',
             'category',
             'image',
+            'gallery_images',
         ]
 
     def get_image(self, obj):
-        """
-        Return a complete image URL when possible.
-        Return None when the product has no image.
-        """
 
         if not obj.image:
             return None

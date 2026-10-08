@@ -6,6 +6,7 @@ const WHATSAPP_NUMBER = "919021278856";
 // Product catalog state
 let allProducts = [];
 let filteredProducts = [];
+let searchDebounceTimer = null;
 
 // 🔥 BACKEND (RENDER)
 const API_BASE = "https://hhh-trader-backend.onrender.com";
@@ -313,10 +314,13 @@ function initProductControls() {
 
 
   if (searchInput) {
-    searchInput.addEventListener(
-      "input",
-      applyProductFilters
-    );
+    searchInput.addEventListener("input", () => {
+  clearTimeout(searchDebounceTimer);
+
+  searchDebounceTimer = setTimeout(() => {
+    applyProductFilters();
+  }, 350);
+});
   }
 
 

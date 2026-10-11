@@ -35,12 +35,12 @@ function getProductId() {
 
 // ================= LOAD PRODUCT =================
 
-async function loadProduct() {
+async function loadProdct() {
 
   const container =
-    document.getElementById("product-detail");
+    document.getElementyId("product-detail");
 
-  const productId = getProductId();
+  const productId = getroductId();
 
 
   if (!productId) {
@@ -124,159 +124,240 @@ async function loadProduct() {
 
 // ================= RENDER PRODUCT =================
 
+
 function renderProduct(product) {
+  const container = document.getElementById("product-detail");
 
-  const container =
-    document.getElementById("product-detail");
+  const title = escapeHTML(product.title || "Untitled Product");
+  const description = escapeHTML(
+    product.description || "No description available."
+  );
+  const category = escapeHTML(product.category || "Uncategorized");
+  const price = Number(product.price) || 0;
 
+  // Main image + gallery images, without duplicates
+  const images = [
+    ...(product.image ? [{
+      url: product.image,
+      alt: product.title || "Product image"
+    }] : []),
 
-  const title =
-    escapeHTML(
-      product.title || "Untitled Product"
-    );
+    ...(Array.isArray(product.gallery_images)
+      ? product.gallery_images
+          .filter(item => item.image)
+          .map(item => ({
+            url: item.image,
+            alt: item.alt_text || product.title || "Product image"
+          }))
+      : [])
+  ].filter((item, index, array) =>
+    array.findIndex(other => other.url === item.url) === index
+  );
 
+  const safeImages = images.length
+    ? images
+    : [{ url: "assets/hero.jpg", alt: "Product image unavailable" }];
 
-  const description =
-    escapeHTML(
-      product.description ||
-      "No description available."
-    );
-
-
-  const category =
-    escapeHTML(
-      product.category ||
-      "Uncategorized"
-    );
-
-
-  const price =
-    Number(product.price) || 0;
-
-
-  const image =
-    product.image || "assets/hero.jpg";
-
-
-  document.title =
-    `${product.title || "Product"} | HHH Traders`;
-
+  document.title = `${product.title || "Product"} | HHH Traders`;
 
   container.innerHTML = `
-
     <div class="product-detail-grid">
 
-      <div class="product-detail-image">
+      <div class="product-gallery">
+        <div class="product-detail-image">
+          <button
+            type="button"
+            class="gallery-main-button"
+            id="gallery-zoom-button"
+            aria-label="Zoom product image"
+          >
+            <img
+              id="gallery-main-image"
+              src="${escapeHTML(safeImages[0].url)}"
+              alt="${escapeHTML(safeImages[0].alt)}"
+            >
+            <span class="gallery-zoom-hint">⌕ Click to zoom</span>
+          </button>
+        </div>
 
-        <img
-          src="${image}"
-          alt="${title}"
-          onerror="this.src='assets/hero.jpg'"
-        >
-
+        ${
+          safeImages.length > 1
+            ? `
+              <div class="product-thumbnails" aria-label="Product images">
+                ${safeImages.map((image, index) => `
+                  <button
+                    type="button"
+                    class="product-thumbnail ${index === 0 ? "active" : ""}"
+                    data-gallery-index="${index}"
+                    aria-label="Show image ${index + 1}"
+                    aria-pressed="${index === 0}"
+                  >
+                    <img
+                      src="${escapeHTML(image.url)}"
+                      alt="${escapeHTML(image.alt)}"
+                      loading="lazy"
+                    >
+                  </button>
+                `).join("")}
+              </div>
+            `
+            : ""
+        }
       </div>
-
 
       <div class="product-detail-info">
-
-        <span class="product-category">
-          ${category}
-        </span>
-
-
-        <h1>
-          ${title}
-        </h1>
-
-
-        <div class="product-detail-price">
-          ₹${price}
-        </div>
-
-
+        <span class="product-category">${category}</span>
+        <h1>${title}</h1>
+        <div class="product-detail-price">₹${price.toLocaleString("en-IN")}</div>
         <div class="product-detail-divider"></div>
-
-
-        <p class="product-detail-description">
-          ${description}
-        </p>
-
+        <p class="product-detail-description">${description}</p>
 
         <div class="product-detail-actions">
-
-          <button
-            id="detail-add-cart"
-            class="btn"
-            type="button"
-          >
+          <button id="detail-add-cart" class="btn" type="button">
             Add to Cart
           </button>
-
-
-          <button
-            id="detail-whatsapp"
-            class="btn ghost"
-            type="button"
-          >
+          <button id="detail-whatsapp" class="btn ghost" type="button">
             Enquire on WhatsApp
           </button>
-
         </div>
 
-
-        <a
-          href="index.html#products"
-          class="back-to-shop"
-        >
+        <a href="index.html#products" class="back-to-shop">
           ← Back to Collection
         </a>
-
       </div>
-
     </div>
 
+    <div id="gallery-lightbox" class="gallery-lightbox" hidden>
+      <button
+        type="button"
+        id="gallery-lightbox-close"
+        class="gallery-lightbox-close"
+        aria-label="Close image zoom"
+      >×</button>
+
+      <button
+        type="button"
+        id="gallery-prev"
+        class="gallery-lightbox-nav gallery-prev"
+        aria-label="Previous image"
+      >‹</button>
+
+      <img id="gallery-lightbox-image" src="" alt="Zoomed product image">
+
+      <button
+        type="button"
+        id="gallery-next"
+        class="gallery-lightbox-nav gallery-next"
+        aria-label="Next image"
+      >›</button>
+
+      <p id="gallery-lightbox-count" class="gallery-lightbox-count"></p>
+    </div>
   `;
 
+  let activeIndex = 0;
 
-  document
-    .getElementById("detail-add-cart")
-    ?.addEventListener(
-      "click",
-      () => {
+  const mainImage = document.getElementById("gallery-main-image");
+  const lightbox = document.getElementById("gallery-lightbox");
+  const lightboxImage = document.getElementById("gallery-lightbox-image");
+  const counter = document.getElementById("gallery-lightbox-count");
 
-        addProductToCart(product);
+  function showImage(index) {
+    activeIndex = (index + safeImages.length) % safeImages.length;
+    const image = safeImages[activeIndex];
 
-      }
-    );
+    mainImage.src = image.url;
+    mainImage.alt = image.alt;
 
+    document.querySelectorAll(".product-thumbnail").forEach((button, i) => {
+      const active = i === activeIndex;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
 
-  document
-    .getElementById("detail-whatsapp")
-    ?.addEventListener(
-      "click",
-      () => {
+    lightboxImage.src = image.url;
+    lightboxImage.alt = image.alt;
 
-        const message =
-          `Hello HHH Traders 👋\n\n` +
-          `I am interested in:\n` +
-          `${product.title}\n\n` +
-          `Price: ₹${price}\n` +
-          `Product ID: ${product.id}`;
+    if (counter) {
+      counter.textContent = `${activeIndex + 1} / ${safeImages.length}`;
+    }
+  }
 
-        const url =
-          `https://wa.me/${WHATSAPP_NUMBER}` +
-          `?text=${encodeURIComponent(message)}`;
+  document.querySelectorAll(".product-thumbnail").forEach(button => {
+    button.addEventListener("click", () => {
+      showImage(Number(button.dataset.galleryIndex));
+    });
+  });
 
-        window.open(
-          url,
-          "_blank",
-          "noopener,noreferrer"
-        );
+  function openLightbox() {
+    showImage(activeIndex);
+    lightbox.hidden = false;
+    document.body.style.overflow = "hidden";
+    document.getElementById("gallery-lightbox-close").focus();
+  }
 
-      }
-    );
+  function closeLightbox() {
+    lightbox.hidden = true;
+    document.body.style.overflow = "";
+    document.getElementById("gallery-zoom-button").focus();
+  }
 
+  document.getElementById("gallery-zoom-button")
+    .addEventListener("click", openLightbox);
+
+  document.getElementById("gallery-lightbox-close")
+    .addEventListener("click", closeLightbox);
+
+  document.getElementById("gallery-prev")
+    .addEventListener("click", () => showImage(activeIndex - 1));
+
+  document.getElementById("gallery-next")
+    .addEventListener("click", () => showImage(activeIndex + 1));
+
+  lightbox.addEventListener("click", event => {
+    if (event.target === lightbox) closeLightbox();
+  });
+
+  document.addEventListener("keydown", function galleryKeyboard(event) {
+    if (lightbox.hidden) return;
+
+    if (event.key === "Escape") {
+      closeLightbox();
+      document.removeEventListener("keydown", galleryKeyboard);
+    } else if (event.key === "ArrowLeft") {
+      showImage(activeIndex - 1);
+    } else if (event.key === "ArrowRight") {
+      showImage(activeIndex + 1);
+    }
+  });
+
+  document.getElementById("detail-add-cart")
+    .addEventListener("click", () => addProductToCart(product));
+
+  document.getElementById("detail-whatsapp")
+    .addEventListener("click", () => {
+      const message =
+        `Hello HHH Traders 👋\n\n` +
+        `I am interested in: ${product.title}\n` +
+        `Price: ₹${price}\n` +
+        `Product ID: ${product.id}`;
+
+      window.open(
+        `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    });
+
+  // If the main image fails, show the fallback image.
+  mainImage.addEventListener("error", () => {
+    if (!mainImage.dataset.fallbackApplied) {
+      mainImage.dataset.fallbackApplied = "true";
+      mainImage.src = "assets/hero.jpg";
+    }
+  });
 }
+
 
 
 // ================= PRODUCT ERROR =================

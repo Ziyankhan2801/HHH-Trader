@@ -124,158 +124,181 @@ async function loadProduct() {
 
 // ================= RENDER PRODUCT =================
 
+
 function renderProduct(product) {
+  const container = document.getElementById("product-detail");
+  if (!container) return;
 
-  const container =
-    document.getElementById("product-detail");
+  const title = escapeHTML(product.title || "Untitled Product");
+  const description = escapeHTML(
+    product.description || "No description available."
+  );
+  const category = escapeHTML(product.category || "Uncategorized");
+  const price = Number(product.price) || 0;
 
+  // Main image + additional gallery images
+  const imageList = [
+    product.image,
+    ...(Array.isArray(product.gallery_images)
+      ? product.gallery_images.map((item) =>
+          typeof item === "string" ? item : item?.image
+        )
+      : [])
+  ].filter((url) => typeof url === "string" && url.trim() !== "");
 
-  const title =
-    escapeHTML(
-      product.title || "Untitled Product"
-    );
+  // Remove duplicate image URLs
+  const images = [...new Set(imageList)];
 
+  if (!images.length) {
+    images.push("assets/hero.jpg");
+  }
 
-  const description =
-    escapeHTML(
-      product.description ||
-      "No description available."
-    );
+  let currentImageIndex = 0;
 
-
-  const category =
-    escapeHTML(
-      product.category ||
-      "Uncategorized"
-    );
-
-
-  const price =
-    Number(product.price) || 0;
-
-
-  const image =
-    product.image || "assets/hero.jpg";
-
-
-  document.title =
-    `${product.title || "Product"} | HHH Traders`;
-
+  document.title = `${product.title || "Product"} | HHH Traders`;
 
   container.innerHTML = `
-
     <div class="product-detail-grid">
 
-      <div class="product-detail-image">
+      <div class="product-gallery">
+        <button type="button" class="gallery-main-button"
+                id="gallery-open-zoom" aria-label="Zoom product image">
+          <img
+            id="gallery-main-image"
+            src="${escapeHTML(images[0])}"
+            alt="${title}"
+          />
+          <span class="gallery-zoom-hint">Click to zoom ⤢</span>
+        </button>
 
-        <img
-          src="${image}"
-          alt="${title}"
-          onerror="this.src='assets/hero.jpg'"
-        >
-
+        <div class="product-thumbnails" id="product-thumbnails">
+          ${images.map((url, index) => `
+            <button type="button"
+              class="product-thumbnail ${index === 0 ? "active" : ""}"
+              data-image-index="${index}"
+              aria-label="Show image ${index + 1}">
+              <img src="${escapeHTML(url)}" alt="${title} view ${index + 1}">
+            </button>
+          `).join("")}
+        </div>
       </div>
-
 
       <div class="product-detail-info">
-
-        <span class="product-category">
-          ${category}
-        </span>
-
-
-        <h1>
-          ${title}
-        </h1>
-
-
-        <div class="product-detail-price">
-          ₹${price}
-        </div>
-
-
+        <span class="product-category">${category}</span>
+        <h1>${title}</h1>
+        <div class="product-detail-price">₹${price}</div>
         <div class="product-detail-divider"></div>
-
-
-        <p class="product-detail-description">
-          ${description}
-        </p>
-
+        <p class="product-detail-description">${description}</p>
 
         <div class="product-detail-actions">
-
-          <button
-            id="detail-add-cart"
-            class="btn"
-            type="button"
-          >
+          <button id="detail-add-cart" class="btn" type="button">
             Add to Cart
           </button>
-
-
-          <button
-            id="detail-whatsapp"
-            class="btn ghost"
-            type="button"
-          >
+          <button id="detail-whatsapp" class="btn ghost" type="button">
             Enquire on WhatsApp
           </button>
-
         </div>
 
-
-        <a
-          href="index.html#products"
-          class="back-to-shop"
-        >
+        <a href="index.html#products" class="back-to-shop">
           ← Back to Collection
         </a>
-
       </div>
-
     </div>
 
+    <div class="gallery-lightbox" id="gallery-lightbox" hidden>
+      <button type="button" class="gallery-close" id="gallery-close"
+              aria-label="Close zoom">&times;</button>
+      <button type="button" class="gallery-prev" id="gallery-prev"
+              aria-label="Previous image">&#10094;</button>
+      <img id="gallery-zoom-image" src="${escapeHTML(images[0])}" alt="${title}">
+      <button type="button" class="gallery-next" id="gallery-next"
+              aria-label="Next image">&#10095;</button>
+      <div class="gallery-counter" id="gallery-counter">1 / ${images.length}</div>
+    </div>
   `;
 
+  const mainImage = document.getElementById("gallery-main-image");
+  const zoomImage = document.getElementById("gallery-zoom-image");
+  const lightbox = document.getElementById("gallery-lightbox");
+  const counter = document.getElementById("gallery-counter");
 
-  document
-    .getElementById("detail-add-cart")
-    ?.addEventListener(
-      "click",
-      () => {
+  function showImage(index) {
+    currentImageIndex = (index + images.length) % images.length;
+    const url = images[currentImageIndex];
 
-        addProductToCart(product);
+    mainImage.src = url;
+    zoomImage.src = url;
+    counter.textContent = `${currentImageIndex + 1} / ${images.length}`;
 
-      }
+    document.querySelectorAll(".product-thumbnail").forEach((thumb, i) => {
+      thumb.classList.toggle("active", i === currentImageIndex);
+    });
+  }
+
+  document.querySelectorAll(".product-thumbnail").forEach((thumb) => {
+    thumb.addEventListener("click", () => {
+      showImage(Number(thumb.dataset.imageIndex));
+    });
+  });
+
+  document.getElementById("gallery-open-zoom").addEventListener("click", () => {
+    lightbox.hidden = false;
+    document.body.style.overflow = "hidden";
+  });
+
+  function closeZoom() {
+    lightbox.hidden = true;
+    document.body.style.overflow = "";
+  }
+
+  document.getElementById("gallery-close").addEventListener("click", closeZoom);
+  document.getElementById("gallery-prev").addEventListener("click", () => {
+    showImage(currentImageIndex - 1);
+  });
+  document.getElementById("gallery-next").addEventListener("click", () => {
+    showImage(currentImageIndex + 1);
+  });
+
+  lightbox.addEventListener("click", (event) => {
+    if (event.target === lightbox) closeZoom();
+  });
+
+  document.addEventListener("keydown", function galleryKeyHandler(event) {
+    if (lightbox.hidden) return;
+
+    if (event.key === "Escape") {
+      closeZoom();
+      document.removeEventListener("keydown", galleryKeyHandler);
+    } else if (event.key === "ArrowLeft") {
+      showImage(currentImageIndex - 1);
+    } else if (event.key === "ArrowRight") {
+      showImage(currentImageIndex + 1);
+    }
+  });
+
+  mainImage.addEventListener("error", () => {
+    if (!mainImage.dataset.fallbackApplied) {
+      mainImage.dataset.fallbackApplied = "true";
+      mainImage.src = "assets/hero.jpg";
+    }
+  });
+
+  document.getElementById("detail-add-cart").addEventListener("click", () => {
+    addProductToCart(product);
+  });
+
+  document.getElementById("detail-whatsapp").addEventListener("click", () => {
+    const message =
+      `Hello HHH Traders 👋\n\n` +
+      `I am interested in:\n${product.title}\n\n` +
+      `Price: ₹${price}\nProduct ID: ${product.id}`;
+
+    window.open(
+      `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`,
+      "_blank",
+      "noopener,noreferrer"
     );
-
-
-  document
-    .getElementById("detail-whatsapp")
-    ?.addEventListener(
-      "click",
-      () => {
-
-        const message =
-          `Hello HHH Traders 👋\n\n` +
-          `I am interested in:\n` +
-          `${product.title}\n\n` +
-          `Price: ₹${price}\n` +
-          `Product ID: ${product.id}`;
-
-        const url =
-          `https://wa.me/${WHATSAPP_NUMBER}` +
-          `?text=${encodeURIComponent(message)}`;
-
-        window.open(
-          url,
-          "_blank",
-          "noopener,noreferrer"
-        );
-
-      }
-    );
-
+  });
 }
 
 

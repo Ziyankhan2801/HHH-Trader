@@ -439,15 +439,39 @@ async function applyProductFilters() {
 
     renderProducts(filteredProducts);
 
+  
   } catch (err) {
     console.error("Filter API error:", err);
 
-    // Fallback to already loaded products
+    // Ignore older requests
     if (requestId !== filterRequestId) {
       return;
     }
 
-    applyLocalFilters();
+    // Use loaded products if available
+    if (allProducts.length > 0) {
+      applyLocalFilters();
+      return;
+    }
+
+    // Try cached products if the API is unavailable
+    const cached = getProductsCache();
+
+    if (cached.length > 0) {
+      allProducts = cached;
+      applyLocalFilters();
+
+      showCatalogNotice(
+        "Showing saved products. Live server is unavailable."
+      );
+
+      return;
+    }
+
+    // No products available and API failed
+    filteredProducts = [];
+    updateProductCount();
+    renderErrorState();
   }
 }
 

@@ -5,6 +5,8 @@ const WHATSAPP_NUMBER = "919021278856";
 
 const CART_KEY = "hhh_cart";
 const WISHLIST_KEY = "hhh_wishlist";
+const RECENTLY_VIEWED_KEY = "hhh_recently_viewed";
+const MAX_RECENTLY_VIEWED = 8;
 
 
 // ================= HTML SAFETY =================
@@ -108,6 +110,111 @@ function toggleDetailWishlist(product) {
 }
 
 
+/* ================= RECENTLY VIEWED ================= */
+
+function getRecentlyViewed() {
+  try {
+    const items = JSON.parse(
+      localStorage.getItem(RECENTLY_VIEWED_KEY)
+    );
+
+    return Array.isArray(items) ? items : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveRecentlyViewed(product) {
+  if (!product || product.id == null) return;
+
+  const recentItems = getRecentlyViewed().filter(
+    item => String(item.id) !== String(product.id)
+  );
+
+  recentItems.unshift({
+    id: product.id,
+    title: product.title || "Untitled Product",
+    price: Number(product.price) || 0,
+    image: product.image || "",
+    category: product.category || ""
+  });
+
+  try {
+    localStorage.setItem(
+      RECENTLY_VIEWED_KEY,
+      JSON.stringify(
+        recentItems.slice(0, MAX_RECENTLY_VIEWED)
+      )
+    );
+  } catch (error) {
+    console.error("Unable to save recently viewed products:", error);
+  }
+}
+
+function renderRecentlyViewed(currentProduct) {
+  const section = document.getElementById(
+    "recently-viewed-section"
+  );
+
+  const grid = document.getElementById(
+    "recently-viewed-grid"
+  );
+
+  if (!section || !grid) return;
+
+  const items = getRecentlyViewed().filter(
+    item => String(item.id) !== String(currentProduct.id)
+  );
+
+  if (items.length === 0) {
+    section.hidden = true;
+    grid.innerHTML = "";
+    return;
+  }
+
+  grid.innerHTML = items.map(item => {
+    const id = encodeURIComponent(String(item.id));
+    const title = escapeHTML(item.title || "Untitled Product");
+    const image = escapeHTML(item.image || "assets/hero.jpg");
+    const price = Number(item.price) || 0;
+
+    return `
+      <article class="related-product-card recently-viewed-card">
+        <a
+          class="related-product-image"
+          href="product.html?id=${id}"
+          aria-label="View ${title}"
+        >
+          <img
+            src="${image}"
+            alt="${title}"
+            loading="lazy"
+          >
+        </a>
+
+        <div class="related-product-info">
+          <h3>
+            <a href="product.html?id=${id}">${title}</a>
+          </h3>
+
+          <p>₹${price}</p>
+
+          <a
+            class="related-product-link"
+            href="product.html?id=${id}"
+          >
+            View Product
+          </a>
+        </div>
+      </article>
+    `;
+  }).join("");
+
+  section.hidden = false;
+}
+
+
+
 async function loadProduct() {
 
   const container =
@@ -177,6 +284,9 @@ async function loadProduct() {
 
 
     renderProduct(product);
+    renderRelatedProducts(product, products);
+    saveRecentlyViewed(product);
+    renderRecentlyViewed(product);
 
   } catch (error) {
 
@@ -393,6 +503,86 @@ updateDetailWishlistButton(product);
       "noopener,noreferrer"
     );
   });
+}
+
+// ================= RELATED PRODUCTS =================
+
+function renderRelatedProducts(currentProduct, allProducts) {
+  const section = document.getElementById(
+    "related-products-section"
+  );
+
+  const grid = document.getElementById(
+    "related-products-grid"
+  );
+
+  if (!section || !grid) return;
+
+  const currentCategory = String(
+    currentProduct.category || ""
+  ).trim().toLowerCase();
+
+  if (!currentCategory || !Array.isArray(allProducts)) {
+    section.hidden = true;
+    grid.innerHTML = "";
+    return;
+  }
+
+  const relatedProducts = allProducts
+    .filter(product =>
+      String(product.id) !== String(currentProduct.id) &&
+      String(product.category || "").trim().toLowerCase() ===
+        currentCategory
+    )
+    .slice(0, 4);
+
+  if (relatedProducts.length === 0) {
+    section.hidden = true;
+    grid.innerHTML = "";
+    return;
+  }
+
+  grid.innerHTML = relatedProducts.map(product => {
+    const id = encodeURIComponent(String(product.id));
+    const title = escapeHTML(product.title || "Untitled Product");
+    const price = Number(product.price) || 0;
+    const image = escapeHTML(
+      product.image || "assets/hero.jpg"
+    );
+
+    return `
+      <article class="related-product-card">
+        <a
+          class="related-product-image"
+          href="product.html?id=${id}"
+          aria-label="View ${title}"
+        >
+          <img
+            src="${image}"
+            alt="${title}"
+            loading="lazy"
+          >
+        </a>
+
+        <div class="related-product-info">
+          <h3>
+            <a href="product.html?id=${id}">${title}</a>
+          </h3>
+
+          <p>₹${price}</p>
+
+          <a
+            class="related-product-link"
+            href="product.html?id=${id}"
+          >
+            View Product
+          </a>
+        </div>
+      </article>
+    `;
+  }).join("");
+
+  section.hidden = false;
 }
 
 

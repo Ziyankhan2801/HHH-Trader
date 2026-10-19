@@ -775,29 +775,124 @@ document.getElementById("img-close")?.addEventListener("click",()=>{
 });
 
 // ================= CART =================
+
 function getCart() {
   try {
-    const cart = JSON.parse(
+    const storedCart = JSON.parse(
       localStorage.getItem(CART_KEY)
     );
 
-    return Array.isArray(cart) ? cart : [];
-  } catch {
+    if (!Array.isArray(storedCart)) {
+      return [];
+    }
+
+    return storedCart
+      .filter(item => {
+        if (!item || typeof item !== "object") {
+          return false;
+        }
+
+        if (
+          item.id == null ||
+          String(item.id).trim() === ""
+        ) {
+          return false;
+        }
+
+        const price = Number(item.price);
+        const qty = Number(item.qty);
+
+        return (
+          item.price !== null &&
+          item.price !== "" &&
+          Number.isFinite(price) &&
+          price >= 0 &&
+          Number.isInteger(qty) &&
+          qty > 0
+        );
+      })
+      .map(item => ({
+        id: item.id,
+        title: String(item.title || "Untitled Product"),
+        price: Number(item.price),
+        img: typeof item.img === "string" ? item.img : "",
+        qty: Number(item.qty)
+      }));
+  } catch (error) {
+    console.error("Unable to read cart:", error);
     return [];
   }
 }
+
 
 function saveCart(cart){
   localStorage.setItem(CART_KEY, JSON.stringify(cart));
 }
 
-function addToCart(item){
+
+function addToCart(item) {
+  if (!item || typeof item !== "object") {
+    alert("Invalid product. Please try again.");
+    return;
+  }
+
+  if (
+    item.id == null ||
+    String(item.id).trim() === ""
+  ) {
+    alert("Product ID is missing.");
+    return;
+  }
+
+  const price = Number(item.price);
+
+  if (
+    item.price === null ||
+    item.price === "" ||
+    !Number.isFinite(price) ||
+    price < 0
+  ) {
+    alert("Invalid product price. Please try again.");
+    return;
+  }
+
+  const requestedQty = Number(item.qty ?? 1);
+
+  if (
+    !Number.isInteger(requestedQty) ||
+    requestedQty <= 0
+  ) {
+    alert("Invalid product quantity.");
+    return;
+  }
+
   const cart = getCart();
-  const found = cart.find(i=>i.id===item.id);
-  found ? found.qty++ : cart.push(item);
-  saveCart(cart);
-  renderCart();
+
+  const existingItem = cart.find(
+    product => String(product.id) === String(item.id)
+  );
+
+  if (existingItem) {
+    existingItem.qty += requestedQty;
+  } else {
+    cart.push({
+      id: item.id,
+      title: String(item.title || "Untitled Product"),
+      price,
+      img: typeof item.img === "string" ? item.img : "",
+      qty: requestedQty
+    });
+  }
+
+  try {
+    saveCart(cart);
+    renderCart();
+  } catch (error) {
+    console.error("Unable to save cart:", error);
+    alert("Cart is not save. Please try again.");
+  }
 }
+
 
 function renderCart(){
   const cart = getCart();

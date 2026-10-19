@@ -1,0 +1,55 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="View your saved favourite products at HHH Traders.">
+  <title>My Wishlist | HHH Traders</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="wishlist.css">
+  <script src="wishlist.js" defer></script>
+</head>
+<body>
+  <header class="wishlist-header">
+    <a class="wishlist-brand" href="index.html">HHH Traders</a>
+    <a class="wishlist-back-link" href="index.html">← Continue Shopping</a>
+  </header>
+
+  <main class="wishlist-page">
+    <section class="wishlist-heading">
+      <p class="wishlist-eyebrow">YOUR FAVOURITES</p>
+      <h1>My Wishlist <span aria-hidden="true">♡</span></h1>
+      <p class="wishlist-subtitle">
+        Keep the products you love in one place.
+      </p>
+    </section>
+
+    <div
+      id="wishlist-status"
+      class="wishlist-status"
+      role="status"
+      aria-live="polite"
+    ></div>
+
+    <section
+      id="wishlist-products"
+      class="wishlist-products"
+      aria-label="Saved products"
+    ></section>
+
+    <section id="wishlist-empty" class="wishlist-empty" hidden>
+      <div class="wishlist-empty-icon" aria-hidden="true">♡</div>
+      <h2>Your wishlist is empty</h2>
+      <p>Explore our collection and save products you love.</p>
+      <a class="wishlist-shop-button" href="index.html">
+        Explore Products
+      </a>
+    </section>
+  </main>
+
+  <footer class="wishlist-footer">
+    <p>HHH Traders · Find something you love.</p>
+  </footer>
+</body>
+</html>

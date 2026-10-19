@@ -2,6 +2,7 @@
 const CART_KEY = "hhh_cart";
 const PRODUCTS_KEY = "hhh_products_cache";
 const WHATSAPP_NUMBER = "919021278856";
+const WISHLIST_KEY = "hhh_wishlist";
 
 // Product catalog state
 let allProducts = [];
@@ -61,6 +62,77 @@ function getProductsCache() {
   }
 }
 
+// ================= WISHLIST =================
+
+function getWishlist() {
+  try {
+    const wishlist = JSON.parse(
+      localStorage.getItem(WISHLIST_KEY)
+    );
+
+    return Array.isArray(wishlist) ? wishlist : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveWishlist(wishlist) {
+  localStorage.setItem(
+    WISHLIST_KEY,
+    JSON.stringify(wishlist)
+  );
+}
+
+function isWishlisted(productId) {
+  return getWishlist().some(
+    item => String(item.id) === String(productId)
+  );
+}
+
+function toggleWishlist(product) {
+  if (!product || product.id == null) return;
+
+  const wishlist = getWishlist();
+
+  const existingIndex = wishlist.findIndex(
+    item => String(item.id) === String(product.id)
+  );
+
+  if (existingIndex !== -1) {
+    wishlist.splice(existingIndex, 1);
+  } else {
+    wishlist.push({
+      id: product.id,
+      title: product.title || "Untitled Product",
+      price: Number(product.price) || 0,
+      image: product.image || "",
+      category: product.category || ""
+    });
+  }
+
+  saveWishlist(wishlist);
+  updateWishlistButtons();
+
+  // Wishlist count/page will be added in a later step.
+}
+
+function updateWishlistButtons() {
+  document.querySelectorAll(".wishlist-toggle").forEach(button => {
+    const saved = isWishlisted(button.dataset.id);
+
+    button.classList.toggle("is-wishlisted", saved);
+    button.textContent = saved ? "♥" : "♡";
+    button.setAttribute(
+      "aria-pressed",
+      String(saved)
+    );
+    button.setAttribute(
+      "aria-label",
+      saved ? "Remove from wishlist" : "Add to wishlist"
+    );
+  });
+}
+
 // ================= RENDER PRODUCTS =================
 function renderProducts(products) {
   const grid = document.getElementById("masonry");
@@ -95,13 +167,22 @@ function renderProducts(products) {
       >
 
         <div class="card-media">
-          <img
-            src="${image}"
-            alt="${title}"
-            loading="lazy"
-            onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22600%22 height=%22400%22 viewBox=%220 0 600 400%22%3E%3Crect width=%22600%22 height=%22400%22 fill=%22%23eeeeee%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23666666%22 font-size=%2224%22%3ENo Image%3C/text%3E%3C/svg%3E'"
-          >
-        </div>
+  <img
+    src="${image}"
+    alt="${title}"
+    loading="lazy"
+    onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22600%22 height=%22400%22 viewBox=%220 0 600 400%22%3E%3Crect width=%22600%22 height=%22400%22 fill=%22%23eeeeee%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23666666%22 font-size=%2224%22%3ENo Image%3C/text%3E%3C/svg%3E'"
+  >
+
+  <button
+    class="wishlist-toggle"
+    type="button"
+    data-id="${p.id}"
+    aria-label="Add to wishlist"
+    aria-pressed="false"
+    title="Add to wishlist"
+  >♡</button>
+</div>
 
         <div class="card-body">
 
@@ -154,6 +235,7 @@ function renderProducts(products) {
   });
 
   bindProductEvents();
+  updateWishlistButtons();
 }
 
 // ================= HTML SAFETY =================
@@ -640,6 +722,20 @@ function showCatalogNotice(message) {
 // ================= PRODUCT EVENTS =================
 function bindProductEvents(){
   document.querySelectorAll(".card").forEach(card=>{
+
+    const wishlistButton = card.querySelector(".wishlist-toggle");
+
+if (wishlistButton) {
+  wishlistButton.addEventListener("click", () => {
+    const product = allProducts.find(
+      item => String(item.id) === String(card.dataset.id)
+    );
+
+    if (product) {
+      toggleWishlist(product);
+    }
+  });
+}
 
     card.querySelector(".add").onclick = ()=>{
       addToCart({

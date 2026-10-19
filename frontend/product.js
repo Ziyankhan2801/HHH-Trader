@@ -4,6 +4,7 @@ const API_URL = `${API_BASE}/api/products/`;
 const WHATSAPP_NUMBER = "919021278856";
 
 const CART_KEY = "hhh_cart";
+const WISHLIST_KEY = "hhh_wishlist";
 
 
 // ================= HTML SAFETY =================
@@ -34,6 +35,78 @@ function getProductId() {
 
 
 // ================= LOAD PRODUCT =================
+
+
+function getWishlist() {
+  try {
+    const wishlist = JSON.parse(
+      localStorage.getItem(WISHLIST_KEY)
+    );
+
+    return Array.isArray(wishlist) ? wishlist : [];
+  } catch {
+    return [];
+  }
+}
+
+function isProductWishlisted(productId) {
+  return getWishlist().some(
+    item => String(item.id) === String(productId)
+  );
+}
+
+function updateDetailWishlistButton(product) {
+  const button = document.querySelector(
+    ".detail-wishlist-toggle"
+  );
+
+  if (!button || !product) return;
+
+  const saved = isProductWishlisted(product.id);
+
+  button.textContent = saved ? "♥ Wishlisted" : "♡ Add to Wishlist";
+  button.classList.toggle("is-wishlisted", saved);
+  button.setAttribute("aria-pressed", String(saved));
+  button.setAttribute(
+    "aria-label",
+    saved ? "Remove from wishlist" : "Add to wishlist"
+  );
+}
+
+function toggleDetailWishlist(product) {
+  if (!product || product.id == null) return;
+
+  const wishlist = getWishlist();
+
+  const existingIndex = wishlist.findIndex(
+    item => String(item.id) === String(product.id)
+  );
+
+  if (existingIndex !== -1) {
+    wishlist.splice(existingIndex, 1);
+  } else {
+    wishlist.push({
+      id: product.id,
+      title: product.title || "Untitled Product",
+      price: Number(product.price) || 0,
+      image: product.image || "",
+      category: product.category || ""
+    });
+  }
+
+  try {
+    localStorage.setItem(
+      WISHLIST_KEY,
+      JSON.stringify(wishlist)
+    );
+
+    updateDetailWishlistButton(product);
+  } catch (error) {
+    console.error("Unable to save wishlist:", error);
+    alert("Wishlist save nahi ho payi. Please try again.");
+  }
+}
+
 
 async function loadProduct() {
 
@@ -197,6 +270,15 @@ function renderProduct(product) {
           <button id="detail-whatsapp" class="btn ghost" type="button">
             Enquire on WhatsApp
           </button>
+
+          <button
+  type="button"
+  class="detail-wishlist-toggle"
+  aria-label="Add to wishlist"
+  aria-pressed="false"
+>
+  ♡ Add to Wishlist
+</button>
         </div>
 
         <a href="index.html#products" class="back-to-shop">
@@ -216,6 +298,18 @@ function renderProduct(product) {
       <div class="gallery-counter" id="gallery-counter">1 / ${images.length}</div>
     </div>
   `;
+
+  const wishlistButton = container.querySelector(
+  ".detail-wishlist-toggle"
+);
+
+if (wishlistButton) {
+  wishlistButton.addEventListener("click", () => {
+    toggleDetailWishlist(product);
+  });
+}
+
+updateDetailWishlistButton(product);
 
   const mainImage = document.getElementById("gallery-main-image");
   const zoomImage = document.getElementById("gallery-zoom-image");

@@ -889,49 +889,141 @@ function addToCart(item) {
     renderCart();
   } catch (error) {
     console.error("Unable to save cart:", error);
-    alert("Cart is not save. Please try again.");
+    alert("Cart is not saved. Please try again.");
   }
 }
 
 
-function renderCart(){
+
+function renderCart() {
   const cart = getCart();
+
   const box = document.getElementById("cart-items");
   const totalBox = document.getElementById("cart-total");
   const count = document.getElementById("cart-count");
 
-  if(!box) return;
+  if (!box) return;
+
+  box.replaceChildren();
 
   let total = 0;
-  box.innerHTML = "";
+  let totalCount = 0;
 
-  cart.forEach((i, index)=>{
-    total += i.price * i.qty;
+  cart.forEach((item, index) => {
+    const price = Number(item.price);
+    const qty = Number(item.qty);
 
-    box.innerHTML += `
-      <div class="cart-item">
-        <img src="${i.img}">
-        <div class="cart-info">
-          <h4>${i.title}</h4>
-          <span>₹${i.price}</span>
+    // Defensive check: only render valid cart items.
+    if (
+      !Number.isFinite(price) ||
+      price < 0 ||
+      !Number.isInteger(qty) ||
+      qty <= 0
+    ) {
+      return;
+    }
 
-          <div class="qty-controls">
-            <button onclick="decreaseQty(${index})">−</button>
-            <span>${i.qty}</span>
-            <button onclick="increaseQty(${index})">+</button>
-          </div>
+    total += price * qty;
+    totalCount += qty;
 
-          <button class="remove-item" onclick="removeItem(${index})">
-            Remove
-          </button>
-        </div>
-      </div>
-    `;
+    const cartItem = document.createElement("div");
+    cartItem.className = "cart-item";
+
+    const image = document.createElement("img");
+
+    // Allow secure remote images or local relative image paths.
+    const imageURL = typeof item.img === "string"
+      ? item.img.trim()
+      : "";
+
+    if (
+      imageURL.startsWith("https://") ||
+      imageURL.startsWith("assets/") ||
+      imageURL.startsWith("./assets/")
+    ) {
+      image.src = imageURL;
+    } else {
+      image.src = "assets/hero.jpg";
+    }
+
+    image.alt = String(item.title || "Product");
+    image.loading = "lazy";
+
+    image.addEventListener("error", () => {
+      if (!image.dataset.fallbackApplied) {
+        image.dataset.fallbackApplied = "true";
+        image.src = "assets/hero.jpg";
+      }
+    });
+
+    const info = document.createElement("div");
+    info.className = "cart-info";
+
+    const title = document.createElement("h4");
+    title.textContent = String(item.title || "Untitled Product");
+
+    const priceLabel = document.createElement("span");
+    priceLabel.textContent = `₹${price}`;
+
+    const quantityControls = document.createElement("div");
+    quantityControls.className = "qty-controls";
+
+    const decreaseButton = document.createElement("button");
+    decreaseButton.type = "button";
+    decreaseButton.textContent = "−";
+    decreaseButton.setAttribute("aria-label", "Decrease quantity");
+
+    decreaseButton.addEventListener("click", () => {
+      decreaseQty(index);
+    });
+
+    const quantityLabel = document.createElement("span");
+    quantityLabel.textContent = String(qty);
+
+    const increaseButton = document.createElement("button");
+    increaseButton.type = "button";
+    increaseButton.textContent = "+";
+    increaseButton.setAttribute("aria-label", "Increase quantity");
+
+    increaseButton.addEventListener("click", () => {
+      increaseQty(index);
+    });
+
+    quantityControls.append(
+      decreaseButton,
+      quantityLabel,
+      increaseButton
+    );
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "remove-item";
+    removeButton.textContent = "Remove";
+
+    removeButton.addEventListener("click", () => {
+      removeItem(index);
+    });
+
+    info.append(
+      title,
+      priceLabel,
+      quantityControls,
+      removeButton
+    );
+
+    cartItem.append(image, info);
+    box.appendChild(cartItem);
   });
 
-  totalBox.textContent = total;
-  count.textContent = cart.reduce((s,i)=>s+i.qty,0);
+  if (totalBox) {
+    totalBox.textContent = String(total);
+  }
+
+  if (count) {
+    count.textContent = String(totalCount);
+  }
 }
+
 
 // ================= CART SIDEBAR =================
 function initCartUI(){

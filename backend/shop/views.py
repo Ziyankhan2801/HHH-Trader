@@ -95,3 +95,116 @@ def product_list(request):
             },
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+@api_view(['POST'])
+def validate_cart(request):
+    """
+    Validate cart product IDs and quantities against current database prices.
+    Does not create an order or reserve stock.
+    """
+    items = request.data.get('items')
+
+    if not isinstance(items, list) or not items:
+        return Response(
+            {
+                "valid": False,
+                "error": "Cart must contain at least one item."
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    requested_quantities = {}
+
+    for item in items:
+        if not isinstance(item, dict):
+            return Response(
+                {"valid": False, "error": "Invalid cart item format."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        product_id = item.get('product_id')
+        quantity = item.get('quantity')
+
+        # Reject booleans, strings, floats and invalid IDs/quantities.
+        if (
+            isinstance(product_id, bool)
+            or not isinstance(product_id, int)
+            or product_id <= 0
+        ):
+            return Response(
+                {"valid": False, "error": "Invalid product ID."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if (
+            isinstance(quantity, bool)
+            or not isinstance(quantity, int)
+            or quantity <= 0
+        ):
+            return Response(
+                {
+                    "valid": False,
+                    "error": "Quantity must be a positive whole number."
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if product_id in requested_quantities:
+            return Response(
+                {
+                    "valid": False,
+                    "error": "Duplicate products are not allowed in the cart."
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        requested_quantities[product_id] = quantity
+
+    products = Product.objects.filter(
+        id__in=requested_quantities.keys(),
+        is_active=True
+    )
+
+    products_by_id = {product.id: product for product in products}
+
+    unavailable_ids = [
+        product_id
+        for product_id in requested_quantities
+        if product_id not in products_by_id
+    ]
+
+    if unavailable_ids:
+        return Response(
+            {
+                "valid": False,
+                "error": "Some products are unavailable or no longer exist.",
+                "unavailable_product_ids": unavailable_ids
+            },
+            status=status.HTTP_409_CONFLICT
+        )
+
+    verified_items = []
+    total = 0
+
+    for product_id, quantity in requested_quantities.items():
+        product = products_by_id[product_id]
+        subtotal = product.price * quantity
+        total += subtotal
+
+        verified_items.append({
+            "product_id": product.id,
+            "title": product.title,
+            "price": product.price,
+            "quantity": quantity,
+            "subtotal": subtotal
+        })
+
+    return Response(
+        {
+            "valid": True,
+            "items": verified_items,
+            "total": total
+        },
+        status=status.HTTP_200_OK
+    )

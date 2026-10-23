@@ -1087,17 +1087,133 @@ function removeItem(index){
 }
 
 // ================= ORDER WHATSAPP =================
-function orderWhatsApp(){
+
+async function orderWhatsApp() {
   const cart = getCart();
-  if(!cart.length) return alert("Cart empty");
 
-  let msg = `🛍️ *HHH Traders*%0A%0A`;
-  cart.forEach(i=>{
-    msg += `• ${i.title} (${i.qty} × ₹${i.price})%0A`;
-  });
+  if (!cart.length) {
+    alert("Your cart is empty.");
+    return;
+  }
 
-  msg += `%0A*Total:* ₹${cart.reduce((s,i)=>s+i.qty*i.price,0)}`;
-  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`);
+  const button = document.querySelector(
+    '#cart-sidebar .cart-footer button[onclick="orderWhatsApp()"]'
+  );
+
+  if (button && button.disabled) return;
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "Verifying prices...";
+  }
+
+  try {
+    const response = await fetch(
+      `${API_BASE}/api/cart/validate/`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          items: cart.map(item => ({
+            product_id: Number(item.id),
+            quantity: item.qty,
+            price: item.price
+          }))
+        })
+      }
+    );
+
+    let result;
+
+    try {
+      result = await response.json();
+    } catch {
+      throw new Error("Invalid response from the server.");
+    }
+
+    if (!response.ok || result.valid !== true) {
+      alert(
+        result.error ||
+        "We couldn't verify your cart. Please try again."
+      );
+      return;
+    }
+
+    if (!Array.isArray(result.items) || !Number.isFinite(result.total)) {
+      alert("The server returned invalid cart details. Please try again.");
+      return;
+    }
+
+    const verifiedItems = result.items;
+
+    // Check that the server verified every cart item.
+    if (verifiedItems.length !== cart.length) {
+      alert("Cart verification was incomplete. Please try again.");
+      return;
+    }
+
+    // Show current prices and require confirmation if any price changed.
+    if (result.price_changed === true) {
+      const changes = verifiedItems
+        .filter(item => item.price_changed)
+        .map(item =>
+          `${item.title}: ₹${item.old_price} → ₹${item.price}`
+        );
+
+      const confirmed = window.confirm(
+        "Some product prices have changed:\n\n" +
+        changes.join("\n") +
+        `\n\nUpdated cart total: ₹${result.total}` +
+        "\n\nDo you want to continue with these prices?"
+      );
+
+      if (!confirmed) {
+        alert("Checkout cancelled. Your cart has not been changed.");
+        return;
+      }
+    }
+
+    // Build the WhatsApp message using verified server prices.
+    const lines = [
+      "🛍️ HHH Traders",
+      "",
+      "Hello! I would like to enquire about these products:",
+      ""
+    ];
+
+    verifiedItems.forEach(item => {
+      lines.push(
+        `• ${item.title} (${item.quantity} × ₹${item.price}) = ₹${item.subtotal}`
+      );
+    });
+
+    lines.push(
+      "",
+      `Total: ₹${result.total}`,
+      "",
+      "Please confirm product availability and final order details."
+    );
+
+    const whatsappURL =
+      `https://wa.me/${WHATSAPP_NUMBER}?text=` +
+      encodeURIComponent(lines.join("\n"));
+
+    window.open(whatsappURL, "_blank");
+
+  } catch (error) {
+    console.error("Cart verification failed:", error);
+
+    alert(
+      "Unable to verify current prices. Please check your internet connection and try again. No WhatsApp enquiry was opened."
+    );
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent = "Order on WhatsApp";
+    }
+  }
 }
 
 // ================= MOBILE NAV =================

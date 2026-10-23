@@ -97,10 +97,11 @@ def product_list(request):
         )
 
 
+
 @api_view(['POST'])
 def validate_cart(request):
     """
-    Validate cart product IDs and quantities against current database prices.
+    Compare cart prices saved by the frontend with current database prices.
     Does not create an order or reserve stock.
     """
     items = request.data.get('items')
@@ -114,7 +115,7 @@ def validate_cart(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    requested_quantities = {}
+    requested_items = {}
 
     for item in items:
         if not isinstance(item, dict):
@@ -125,8 +126,8 @@ def validate_cart(request):
 
         product_id = item.get('product_id')
         quantity = item.get('quantity')
+        old_price = item.get('price')
 
-        # Reject booleans, strings, floats and invalid IDs/quantities.
         if (
             isinstance(product_id, bool)
             or not isinstance(product_id, int)
@@ -150,7 +151,21 @@ def validate_cart(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        if product_id in requested_quantities:
+        if (
+            isinstance(old_price, bool)
+            or not isinstance(old_price, (int, float))
+            or old_price < 0
+            or old_price != int(old_price)
+        ):
+            return Response(
+                {
+                    "valid": False,
+                    "error": "A valid saved price is required."
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if product_id in requested_items:
             return Response(
                 {
                     "valid": False,
@@ -159,10 +174,13 @@ def validate_cart(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        requested_quantities[product_id] = quantity
+        requested_items[product_id] = {
+            "quantity": quantity,
+            "old_price": int(old_price)
+        }
 
     products = Product.objects.filter(
-        id__in=requested_quantities.keys(),
+        id__in=requested_items.keys(),
         is_active=True
     )
 
@@ -170,7 +188,7 @@ def validate_cart(request):
 
     unavailable_ids = [
         product_id
-        for product_id in requested_quantities
+        for product_id in requested_items
         if product_id not in products_by_id
     ]
 
@@ -186,25 +204,39 @@ def validate_cart(request):
 
     verified_items = []
     total = 0
+    price_changed = False
 
-    for product_id, quantity in requested_quantities.items():
+    for product_id, cart_item in requested_items.items():
         product = products_by_id[product_id]
-        subtotal = product.price * quantity
-        total += subtotal
+        quantity = cart_item["quantity"]
+        old_price = cart_item["old_price"]
+        current_price = product.price
+        subtotal = current_price * quantity
+
+        item_price_changed = old_price != current_price
+
+        if item_price_changed:
+            price_changed = True
 
         verified_items.append({
             "product_id": product.id,
             "title": product.title,
-            "price": product.price,
+            "old_price": old_price,
+            "price": current_price,
+            "price_changed": item_price_changed,
             "quantity": quantity,
             "subtotal": subtotal
         })
 
+        total += subtotal
+
     return Response(
         {
             "valid": True,
+            "price_changed": price_changed,
             "items": verified_items,
-            "total": total
+            "total": total,
+            "confirmation_required": price_changed
         },
         status=status.HTTP_200_OK
     )
